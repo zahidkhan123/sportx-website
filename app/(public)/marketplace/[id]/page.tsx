@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { marketplaceAPI } from "@/lib/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { marketplaceAPI, packagesAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +20,7 @@ import {
   Star,
   ChevronLeft,
   ChevronRight,
+  Rocket,
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -32,6 +33,38 @@ export default function MarketplaceAdDetailsPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Get current user from localStorage
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        setCurrentUser(JSON.parse(userStr));
+      }
+    }
+  }, []);
+
+  // Fetch user credits
+  const { data: creditsData } = useQuery({
+    queryKey: ["user-credits"],
+    queryFn: async () => {
+      const response = await packagesAPI.getUserCredits();
+      const user = response.data?.user || response.data;
+      return {
+        boostCredits: user?.boostCredits || 0,
+        featuredCredits: user?.featuredCredits || 0,
+      };
+    },
+    enabled: !!currentUser,
+  });
+
+  const credits = creditsData || {
+    boostCredits: 0,
+    featuredCredits: 0,
+  };
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["marketplace-ad", adId],
@@ -39,6 +72,59 @@ export default function MarketplaceAdDetailsPage() {
   });
 
   const ad = data?.data;
+
+  const isOwner =
+    currentUser &&
+    ad &&
+    (currentUser._id === ad.userId?._id ||
+      currentUser._id === ad.sellerId?._id ||
+      currentUser._id === ad.userId ||
+      currentUser._id === ad.sellerId);
+
+  // Boost mutation
+  const boostMutation = useMutation({
+    mutationFn: () => marketplaceAPI.boostAd(adId),
+    onSuccess: () => {
+      toast.success("Ad boosted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["marketplace-ad", adId] });
+      queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+      refetch();
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error.response?.data?.message || "Failed to boost ad";
+      if (error.response?.data?.requiresPackage) {
+        toast.error(errorMessage, {
+          action: {
+            label: "Buy Package",
+            onClick: () => router.push("/packages"),
+          },
+        });
+      } else {
+        toast.error(errorMessage);
+      }
+    },
+  });
+
+  const handleBoost = () => {
+    if (credits.boostCredits < 1) {
+      toast.error("Insufficient boost credits", {
+        action: {
+          label: "Buy Package",
+          onClick: () => router.push("/packages"),
+        },
+      });
+      return;
+    }
+
+    if (
+      confirm(
+        "Boost your ad for 24 hours to get more visibility. This will use 1 boost credit."
+      )
+    ) {
+      boostMutation.mutate();
+    }
+  };
 
   useEffect(() => {
     if (ad) {
@@ -425,6 +511,26 @@ export default function MarketplaceAdDetailsPage() {
 
             {/* Action Buttons */}
             <div className="space-y-3">
+              {isOwner && !ad?.isBoosted && (
+                <Button
+                  onClick={handleBoost}
+                  disabled={boostMutation.isPending || credits.boostCredits < 1}
+                  className="w-full bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white hover:from-[#FF6B6B]/90 hover:to-[#FF8E53]/90 h-14 text-lg font-semibold"
+                >
+                  <Rocket className="h-5 w-5 mr-2" />
+                  {boostMutation.isPending
+                    ? "Boosting..."
+                    : `Boost Ad (${credits.boostCredits} credits)`}
+                </Button>
+              )}
+              {isOwner && ad?.isBoosted && (
+                <div className="w-full bg-gradient-to-r from-[#00FFA3] to-[#00CFFF] text-black p-4 rounded-lg text-center font-semibold">
+                  <Rocket className="h-5 w-5 mx-auto mb-2" />
+                  Ad is Boosted
+                </div>
+              )}
+              {!isOwner && (
+                <>
                   <Button
                     onClick={handleCall}
                     className="w-full bg-[#00FFA3] text-black hover:bg-[#00FFA3]/90 h-14 text-lg font-semibold"
@@ -439,6 +545,8 @@ export default function MarketplaceAdDetailsPage() {
                     <MessageCircle className="h-5 w-5 mr-2" />
                     WhatsApp
                   </Button>
+                </>
+              )}
               <Button
                 variant="outline"
                 onClick={handleReport}

@@ -44,6 +44,27 @@ export function Footer() {
           </div>
 
           <div>
+            <h4 className="text-sm font-semibold text-white mb-4">Account</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/packages" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  Buy Packages
+                </Link>
+              </li>
+              <li>
+                <Link href="/my-credits" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  My Credits
+                </Link>
+              </li>
+              <li>
+                <Link href="/my-listings" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  My Listings
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
             <h4 className="text-sm font-semibold text-white mb-4">Support</h4>
             <ul className="space-y-2">
               <li>

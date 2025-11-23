@@ -343,6 +343,7 @@ export default function MarketplacePage() {
                   condition={item.condition as "New" | "Used"}
                   viewsCount={item.viewsCount as number}
                   isFeatured={item.isFeatured as boolean}
+                  isBoosted={item.isBoosted as boolean}
                   href={`/marketplace/${item._id}`}
                   status={item.status as "active" | "sold" | "expired"}
                 />

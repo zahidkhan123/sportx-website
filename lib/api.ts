@@ -250,6 +250,14 @@ export const marketplaceAPI = {
     });
     return response.data;
   },
+  boostAd: async (id: string) => {
+    const response = await api.post(`/api/marketplace/${id}/boost`);
+    return response.data;
+  },
+  featureAd: async (id: string) => {
+    const response = await api.post(`/api/marketplace/${id}/feature`);
+    return response.data;
+  },
 };
 
 // Users API
@@ -374,6 +382,37 @@ export const uploadAPI = {
         url: presignedData.data.url,
       },
     };
+  },
+};
+
+// Packages API
+export const packagesAPI = {
+  getAll: async () => {
+    const response = await api.get("/api/packages");
+    return response.data;
+  },
+  purchase: async (packageId: string, paymentProof?: string) => {
+    const response = await api.post("/api/packages/purchase", {
+      packageId,
+      paymentProof,
+    });
+    return response.data;
+  },
+  getUserPurchases: async () => {
+    const response = await api.get("/api/packages/my-purchases");
+    return response.data;
+  },
+  getUserCredits: async () => {
+    const response = await api.get("/api/auth/profile");
+    return response.data;
+  },
+  useBoost: async (adId: string) => {
+    const response = await api.post(`/api/listings/use-boost/${adId}`);
+    return response.data;
+  },
+  useFeature: async (adId: string) => {
+    const response = await api.post(`/api/listings/use-feature/${adId}`);
+    return response.data;
   },
 };
 

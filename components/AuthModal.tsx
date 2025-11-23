@@ -1,52 +1,52 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { authService } from '@/lib/auth';
-import { CITIES, GENDERS } from '@/lib/constants';
-import { toast } from 'sonner';
-import Script from 'next/script';
+} from "@/components/ui/select";
+import { authService } from "@/lib/auth";
+import { CITIES, GENDERS } from "@/lib/constants";
+import { toast } from "sonner";
+import Script from "next/script";
 
 interface AuthModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  defaultTab?: 'login' | 'signup';
+  defaultTab?: "login" | "signup";
   onSuccess?: () => void;
 }
 
 function AuthModalContent({
   open,
   onOpenChange,
-  defaultTab = 'login',
+  defaultTab = "login",
   onSuccess,
 }: AuthModalProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'login' | 'signup'>(defaultTab);
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [activeTab, setActiveTab] = useState<"login" | "signup">(defaultTab);
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    city: '',
-    gender: '',
+    name: "",
+    email: "",
+    password: "",
+    city: "",
+    gender: "",
   });
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
@@ -59,58 +59,60 @@ function AuthModalContent({
 
   // Google Login
   const handleGoogleLogin = useCallback(() => {
-    setSocialLoading('google');
+    setSocialLoading("google");
     // @ts-ignore - google is loaded via script
-    if (typeof window !== 'undefined' && window.google) {
+    if (typeof window !== "undefined" && window.google) {
       // @ts-ignore
-      window.google.accounts.oauth2.initTokenClient({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-        scope: 'openid profile email',
-        callback: async (response: any) => {
-          try {
-            // Get user info to extract ID token
-            const userInfoResponse = await fetch(
-              'https://www.googleapis.com/oauth2/v3/userinfo',
-              {
-                headers: {
-                  Authorization: `Bearer ${response.access_token}`,
-                },
+      window.google.accounts.oauth2
+        .initTokenClient({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+          scope: "openid profile email",
+          callback: async (response: any) => {
+            try {
+              // Get user info to extract ID token
+              const userInfoResponse = await fetch(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                {
+                  headers: {
+                    Authorization: `Bearer ${response.access_token}`,
+                  },
+                }
+              );
+              const userInfo = await userInfoResponse.json();
+
+              // Send the access token - backend will verify it
+              await authService.googleLogin(response.access_token, true);
+              toast.success("Google login successful!");
+              onOpenChange(false);
+              if (onSuccess) {
+                onSuccess();
+              } else {
+                router.refresh();
               }
-            );
-            const userInfo = await userInfoResponse.json();
-            
-            // Send the access token - backend will verify it
-            await authService.googleLogin(response.access_token, true);
-            toast.success('Google login successful!');
-            onOpenChange(false);
-            if (onSuccess) {
-              onSuccess();
-            } else {
-              router.refresh();
+            } catch (error: any) {
+              toast.error(error.message || "Google login failed");
+            } finally {
+              setSocialLoading(null);
             }
-          } catch (error: any) {
-            toast.error(error.message || 'Google login failed');
-          } finally {
-            setSocialLoading(null);
-          }
-        },
-      }).requestAccessToken();
+          },
+        })
+        .requestAccessToken();
     } else {
-      toast.error('Google SDK not loaded');
+      toast.error("Google SDK not loaded");
       setSocialLoading(null);
     }
   }, [onSuccess, onOpenChange, router]);
 
   // Facebook Login
   const handleFacebookLogin = useCallback(() => {
-    setSocialLoading('facebook');
-    
+    setSocialLoading("facebook");
+
     // Wait for SDK to be ready with retry mechanism
     const tryFacebookLogin = (retries = 5) => {
       // @ts-ignore - FB is loaded via script
-      const FB = typeof window !== 'undefined' ? (window as any).FB : null;
-      
-      if (FB && typeof FB.login === 'function') {
+      const FB = typeof window !== "undefined" ? (window as any).FB : null;
+
+      if (FB && typeof FB.login === "function") {
         // Check if FB is initialized by calling getLoginStatus
         FB.getLoginStatus((response: any) => {
           // SDK is ready, now try to login
@@ -119,8 +121,10 @@ function AuthModalContent({
               async (loginResponse: any) => {
                 if (loginResponse.authResponse) {
                   try {
-                    await authService.facebookLogin(loginResponse.authResponse.accessToken);
-                    toast.success('Facebook login successful!');
+                    await authService.facebookLogin(
+                      loginResponse.authResponse.accessToken
+                    );
+                    toast.success("Facebook login successful!");
                     onOpenChange(false);
                     if (onSuccess) {
                       onSuccess();
@@ -128,28 +132,30 @@ function AuthModalContent({
                       router.refresh();
                     }
                   } catch (error: any) {
-                    console.error('Facebook login API error:', error);
-                    toast.error(error.message || 'Facebook login failed');
+                    console.error("Facebook login API error:", error);
+                    toast.error(error.message || "Facebook login failed");
                   } finally {
                     setSocialLoading(null);
                   }
                 } else {
-                  if (loginResponse.status !== 'unknown') {
-                    toast.error('Facebook login cancelled');
+                  if (loginResponse.status !== "unknown") {
+                    toast.error("Facebook login cancelled");
                   }
                   setSocialLoading(null);
                 }
               },
-              { scope: 'email,public_profile' }
+              { scope: "email,public_profile" }
             );
           } catch (error: any) {
-            console.error('Facebook login error:', error);
-            console.error('Error details:', {
+            console.error("Facebook login error:", error);
+            console.error("Error details:", {
               message: error.message,
               name: error.name,
               stack: error.stack,
             });
-            toast.error('Failed to initialize Facebook login. Please check browser console for details.');
+            toast.error(
+              "Failed to initialize Facebook login. Please check browser console for details."
+            );
             setSocialLoading(null);
           }
         }, true); // Force roundtrip to check status
@@ -157,31 +163,32 @@ function AuthModalContent({
         // Retry after a short delay
         setTimeout(() => tryFacebookLogin(retries - 1), 300);
       } else {
-        console.error('Facebook SDK not available:', {
+        console.error("Facebook SDK not available:", {
           FB: !!FB,
           FBLogin: FB && typeof FB.login,
-          windowFB: typeof window !== 'undefined' ? !!(window as any).FB : false,
+          windowFB:
+            typeof window !== "undefined" ? !!(window as any).FB : false,
         });
-        toast.error('Facebook SDK not loaded. Please refresh the page.');
+        toast.error("Facebook SDK not loaded. Please refresh the page.");
         setSocialLoading(null);
       }
     };
-    
+
     tryFacebookLogin();
   }, [onSuccess, onOpenChange, router]);
 
   // Apple Login
   const handleAppleLogin = useCallback(() => {
-    setSocialLoading('apple');
+    setSocialLoading("apple");
     // @ts-ignore - AppleID is loaded via script
-    if (typeof window !== 'undefined' && window.AppleID) {
+    if (typeof window !== "undefined" && window.AppleID) {
       // @ts-ignore
       window.AppleID.auth.signIn({
-        requestedScopes: ['name', 'email'],
+        requestedScopes: ["name", "email"],
         success: async (response: any) => {
           try {
             await authService.appleLogin(response.id_token, response.user);
-            toast.success('Apple login successful!');
+            toast.success("Apple login successful!");
             onOpenChange(false);
             if (onSuccess) {
               onSuccess();
@@ -189,18 +196,18 @@ function AuthModalContent({
               router.refresh();
             }
           } catch (error: any) {
-            toast.error(error.message || 'Apple login failed');
+            toast.error(error.message || "Apple login failed");
           } finally {
             setSocialLoading(null);
           }
         },
         failure: (error: any) => {
-          toast.error('Apple login failed');
+          toast.error("Apple login failed");
           setSocialLoading(null);
         },
       });
     } else {
-      toast.error('Apple Sign In SDK not loaded');
+      toast.error("Apple Sign In SDK not loaded");
       setSocialLoading(null);
     }
   }, [onSuccess, onOpenChange, router]);
@@ -211,7 +218,7 @@ function AuthModalContent({
 
     try {
       await authService.login(loginData.email, loginData.password);
-      toast.success('Login successful!');
+      toast.success("Login successful!");
       onOpenChange(false);
       if (onSuccess) {
         onSuccess();
@@ -219,7 +226,7 @@ function AuthModalContent({
         router.refresh();
       }
     } catch (error: any) {
-      toast.error(error.message || 'Login failed');
+      toast.error(error.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -231,7 +238,7 @@ function AuthModalContent({
 
     try {
       await authService.register(signupData);
-      toast.success('Account created successfully!');
+      toast.success("Account created successfully!");
       onOpenChange(false);
       if (onSuccess) {
         onSuccess();
@@ -239,7 +246,7 @@ function AuthModalContent({
         router.refresh();
       }
     } catch (error: any) {
-      toast.error(error.message || 'Registration failed');
+      toast.error(error.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -250,7 +257,7 @@ function AuthModalContent({
       <DialogContent className="glass-card border-white/10 max-w-md max-h-[90vh] overflow-y-auto bg-black">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-white">
-            {activeTab === 'login' ? (
+            {activeTab === "login" ? (
               <>
                 Welcome back to <span className="text-[#00FFFF]">Sport</span>X
               </>
@@ -261,9 +268,9 @@ function AuthModalContent({
             )}
           </DialogTitle>
           <DialogDescription className="text-white/70">
-            {activeTab === 'login'
-              ? 'Sign in to your account'
-              : 'Create your account to get started'}
+            {activeTab === "login"
+              ? "Sign in to your account"
+              : "Create your account to get started"}
           </DialogDescription>
         </DialogHeader>
 
@@ -271,24 +278,24 @@ function AuthModalContent({
         <div className="flex gap-2 mb-6">
           <Button
             type="button"
-            variant={activeTab === 'login' ? 'default' : 'ghost'}
-            onClick={() => setActiveTab('login')}
+            variant={activeTab === "login" ? "default" : "ghost"}
+            onClick={() => setActiveTab("login")}
             className={`flex-1 ${
-              activeTab === 'login'
-                ? 'bg-[#00FFFF] text-black hover:bg-[#00FFFF]/90'
-                : 'text-white/70 hover:text-white'
+              activeTab === "login"
+                ? "bg-[#00FFFF] text-black hover:bg-[#00FFFF]/90"
+                : "text-white/70 hover:text-white"
             }`}
           >
             Login
           </Button>
           <Button
             type="button"
-            variant={activeTab === 'signup' ? 'default' : 'ghost'}
-            onClick={() => setActiveTab('signup')}
+            variant={activeTab === "signup" ? "default" : "ghost"}
+            onClick={() => setActiveTab("signup")}
             className={`flex-1 ${
-              activeTab === 'signup'
-                ? 'bg-[#00FFFF] text-black hover:bg-[#00FFFF]/90'
-                : 'text-white/70 hover:text-white'
+              activeTab === "signup"
+                ? "bg-[#00FFFF] text-black hover:bg-[#00FFFF]/90"
+                : "text-white/70 hover:text-white"
             }`}
           >
             Sign Up
@@ -296,7 +303,7 @@ function AuthModalContent({
         </div>
 
         {/* Login Form */}
-        {activeTab === 'login' && (
+        {activeTab === "login" && (
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="login-email" className="text-white">
@@ -325,7 +332,7 @@ function AuthModalContent({
                   onClick={(e) => {
                     e.preventDefault();
                     onOpenChange(false);
-                    router.push('/forgot-password');
+                    router.push("/forgot-password");
                   }}
                 >
                   Forgot password?
@@ -347,7 +354,7 @@ function AuthModalContent({
               disabled={loading}
               className="w-full bg-[#00FFFF] text-black hover:bg-[#00FFFF]/90"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
 
             {/* Social Login Divider */}
@@ -356,7 +363,9 @@ function AuthModalContent({
                 <span className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-black px-2 text-white/70">Or continue with</span>
+                <span className="bg-black px-2 text-white/70">
+                  Or continue with
+                </span>
               </div>
             </div>
 
@@ -369,7 +378,7 @@ function AuthModalContent({
                 disabled={loading || socialLoading !== null}
                 className="flex-1 border-white/10 bg-white/5 text-white hover:bg-white/10"
               >
-                {socialLoading === 'google' ? (
+                {socialLoading === "google" ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
                 ) : (
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -399,10 +408,14 @@ function AuthModalContent({
                 disabled={loading || socialLoading !== null}
                 className="flex-1 border-white/10 bg-white/5 text-white hover:bg-white/10"
               >
-                {socialLoading === 'facebook' ? (
+                {socialLoading === "facebook" ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
                 ) : (
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="h-5 w-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
                 )}
@@ -414,10 +427,14 @@ function AuthModalContent({
                 disabled={loading || socialLoading !== null}
                 className="flex-1 border-white/10 bg-white/5 text-white hover:bg-white/10"
               >
-                {socialLoading === 'apple' ? (
+                {socialLoading === "apple" ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
                 ) : (
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="h-5 w-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
                   </svg>
                 )}
@@ -427,7 +444,7 @@ function AuthModalContent({
         )}
 
         {/* Signup Form */}
-        {activeTab === 'signup' && (
+        {activeTab === "signup" && (
           <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="signup-name" className="text-white">
@@ -491,7 +508,11 @@ function AuthModalContent({
                   </SelectTrigger>
                   <SelectContent className="bg-black border-white/10">
                     {CITIES.map((city) => (
-                      <SelectItem key={city} value={city} className="text-white">
+                      <SelectItem
+                        key={city}
+                        value={city}
+                        className="text-white"
+                      >
                         {city}
                       </SelectItem>
                     ))}
@@ -530,7 +551,7 @@ function AuthModalContent({
               disabled={loading}
               className="w-full bg-[#00FFFF] text-black hover:bg-[#00FFFF]/90"
             >
-              {loading ? 'Creating account...' : 'Sign Up'}
+              {loading ? "Creating account..." : "Sign Up"}
             </Button>
 
             {/* Social Login Divider */}
@@ -539,7 +560,9 @@ function AuthModalContent({
                 <span className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-black px-2 text-white/70">Or continue with</span>
+                <span className="bg-black px-2 text-white/70">
+                  Or continue with
+                </span>
               </div>
             </div>
 
@@ -552,7 +575,7 @@ function AuthModalContent({
                 disabled={loading || socialLoading !== null}
                 className="flex-1 border-white/10 bg-white/5 text-white hover:bg-white/10"
               >
-                {socialLoading === 'google' ? (
+                {socialLoading === "google" ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
                 ) : (
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -582,10 +605,14 @@ function AuthModalContent({
                 disabled={loading || socialLoading !== null}
                 className="flex-1 border-white/10 bg-white/5 text-white hover:bg-white/10"
               >
-                {socialLoading === 'facebook' ? (
+                {socialLoading === "facebook" ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
                 ) : (
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="h-5 w-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
                 )}
@@ -597,10 +624,14 @@ function AuthModalContent({
                 disabled={loading || socialLoading !== null}
                 className="flex-1 border-white/10 bg-white/5 text-white hover:bg-white/10"
               >
-                {socialLoading === 'apple' ? (
+                {socialLoading === "apple" ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
                 ) : (
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="h-5 w-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
                   </svg>
                 )}
@@ -614,9 +645,9 @@ function AuthModalContent({
 }
 
 export function AuthModal(props: AuthModalProps) {
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
-  const facebookAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '';
-  const appleClientId = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || '';
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+  const facebookAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || "";
+  const appleClientId = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || "";
 
   return (
     <>
@@ -640,19 +671,19 @@ export function AuthModal(props: AuthModalProps) {
           src="https://connect.facebook.net/en_US/sdk.js"
           onLoad={() => {
             // @ts-ignore
-            if (typeof window !== 'undefined' && window.FB) {
+            if (typeof window !== "undefined" && window.FB) {
               // @ts-ignore
               window.FB.init({
                 appId: facebookAppId,
                 cookie: true,
                 xfbml: true,
-                version: 'v18.0',
+                version: "v18.0",
               });
-              console.log('Facebook SDK loaded successfully');
+              console.log("Facebook SDK loaded successfully");
             }
           }}
           onError={() => {
-            console.error('Failed to load Facebook SDK');
+            console.error("Failed to load Facebook SDK");
           }}
         />
       )}
@@ -665,11 +696,11 @@ export function AuthModal(props: AuthModalProps) {
           src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
           onLoad={() => {
             // @ts-ignore
-            if (typeof window !== 'undefined' && window.AppleID) {
+            if (typeof window !== "undefined" && window.AppleID) {
               // @ts-ignore
               window.AppleID.auth.init({
                 clientId: appleClientId,
-                scope: 'name email',
+                scope: "name email",
                 redirectURI: window.location.origin,
                 usePopup: true,
               });
@@ -682,4 +713,3 @@ export function AuthModal(props: AuthModalProps) {
     </>
   );
 }
-

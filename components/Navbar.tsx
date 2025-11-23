@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ShoppingBag, User, LogOut, Plus } from 'lucide-react';
+import { Menu, X, ShoppingBag, User, LogOut, Plus, Package, CreditCard } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { authService, type User as AuthUser } from '@/lib/auth';
@@ -68,6 +68,18 @@ export function Navbar() {
                 <Link href="/my-listings">
                   <Button variant="ghost" className="text-white/70 hover:text-white">
                     My Listings
+                  </Button>
+                </Link>
+                <Link href="/packages">
+                  <Button variant="ghost" className="text-white/70 hover:text-white">
+                    <Package className="h-4 w-4 mr-2" />
+                    Packages
+                  </Button>
+                </Link>
+                <Link href="/my-credits">
+                  <Button variant="ghost" className="text-white/70 hover:text-white">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Credits
                   </Button>
                 </Link>
                 <Link href="/profile">
@@ -143,6 +155,22 @@ export function Navbar() {
                   className="block px-4 py-2 text-sm font-medium text-white/70 hover:text-white"
                 >
                   My Listings
+                </Link>
+                <Link
+                  href="/packages"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-4 py-2 text-sm font-medium text-white/70 hover:text-white"
+                >
+                  <Package className="h-4 w-4 inline mr-2" />
+                  Packages
+                </Link>
+                <Link
+                  href="/my-credits"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-4 py-2 text-sm font-medium text-white/70 hover:text-white"
+                >
+                  <CreditCard className="h-4 w-4 inline mr-2" />
+                  My Credits
                 </Link>
                 <Link
                   href="/profile"
