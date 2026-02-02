@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { MessageCircle, Phone } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MessageCircle, Phone, Star, Rocket } from "lucide-react";
 import Image from "next/image";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 
@@ -22,6 +23,8 @@ interface ListingCardProps {
   createdAt?: string;
   listingData?: Record<string, unknown>; // For generating descriptive subtitles
   location?: Record<string, unknown>; // For location data
+  isFeatured?: boolean;
+  isBoosted?: boolean;
 }
 
 export function ListingCard({
@@ -35,6 +38,8 @@ export function ListingCard({
   createdAt,
   listingData,
   location,
+  isFeatured = false,
+  isBoosted = false,
 }: ListingCardProps) {
   const formatSport = (sportType?: string) => {
     if (!sportType) return "";
@@ -374,7 +379,27 @@ export function ListingCard({
 
   return (
     <Link href={href}>
-      <Card className="glass-card border-white/10 hover:border-[#00FFFF]/50 transition-all cursor-pointer group w-full">
+      <Card className="glass-card border-white/10 hover:border-[#00FFFF]/50 transition-all cursor-pointer group w-full relative">
+        {/* Featured Badge */}
+        {isFeatured && (
+          <div className="absolute top-3 left-3 z-10">
+            <Badge className="bg-gradient-to-r from-[#00FFA3] to-[#00CFFF] text-black border-0 px-2.5 py-1 text-xs font-bold flex items-center gap-1 shadow-lg">
+              <Star className="h-3 w-3 fill-black" />
+              Featured
+            </Badge>
+          </div>
+        )}
+
+        {/* Boost Badge - Show even if featured, positioned below featured badge */}
+        {isBoosted && (
+          <div className={`absolute ${isFeatured ? 'top-12 left-3' : 'top-3 left-3'} z-10`}>
+            <Badge className="bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white border-0 px-2.5 py-1 text-xs font-bold flex items-center gap-1 shadow-lg">
+              <Rocket className="h-3 w-3 fill-white" />
+              Boosted
+            </Badge>
+          </div>
+        )}
+
         <CardContent className="p-6">
           {/* Profile Row */}
           <div className="flex items-center gap-4 mb-3">

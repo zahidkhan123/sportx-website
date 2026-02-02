@@ -11,8 +11,34 @@ export type User = {
 };
 
 export const authService = {
-  register: async (data: { name: string; email: string; password: string; city?: string; gender?: string }) => {
-    const response = await authAPI.register(data);
+  register: async (data: {
+    fullName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    phoneNumber?: string;
+    phone?: string;
+    country: string;
+    state: string;
+    city: string;
+    role: string | string[];
+    gender: string;
+    favoriteSports: string[];
+  }) => {
+    // Convert role to array if it's a string (backend expects array)
+    const roleArray = Array.isArray(data.role)
+      ? data.role
+      : data.role
+      ? [data.role]
+      : [];
+
+    const payload = {
+      ...data,
+      role: roleArray,
+      favoriteSports: data.favoriteSports || [],
+    };
+
+    const response = await authAPI.register(payload);
     if (response.success && response.data?.token) {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));

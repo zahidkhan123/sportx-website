@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { marketplaceAPI, packagesAPI } from "@/lib/api";
+import { marketplaceAPI, packagesAPI, chatAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,6 +33,7 @@ export default function MarketplaceAdDetailsPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
   const queryClient = useQueryClient();
 
   // Get current user from localStorage
@@ -532,11 +533,35 @@ export default function MarketplaceAdDetailsPage() {
               {!isOwner && (
                 <>
                   <Button
-                    onClick={handleCall}
+                    onClick={async () => {
+                      setChatLoading(true);
+                      try {
+                        const res = await chatAPI.getOrCreateChat(
+                          "PRODUCT",
+                          adId
+                        );
+                        const chat = res?.data?.chat;
+                        if (chat) router.push(`/chats/${chat._id}`);
+                      } catch (e: any) {
+                        toast.error(
+                          e?.response?.data?.message || "Could not start chat"
+                        );
+                      } finally {
+                        setChatLoading(false);
+                      }
+                    }}
+                    disabled={chatLoading}
                     className="w-full bg-[#00FFA3] text-black hover:bg-[#00FFA3]/90 h-14 text-lg font-semibold"
                   >
+                    <MessageCircle className="h-5 w-5 mr-2" />
+                    {chatLoading ? "Opening..." : "Chat with Seller"}
+                  </Button>
+                  <Button
+                    onClick={handleCall}
+                    className="w-full bg-white/10 text-white hover:bg-white/20 h-14 text-lg font-semibold border border-white/20"
+                  >
                     <Phone className="h-5 w-5 mr-2" />
-                    Contact Seller
+                    Call
                   </Button>
                   <Button
                     onClick={handleWhatsApp}

@@ -21,6 +21,8 @@ import {
   Package,
   Trash2,
   Rocket,
+  MessageSquare,
+  HelpCircle,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -495,6 +497,24 @@ export default function ProfilePage() {
                     >
                       <Package className="h-4 w-4 mr-2" />
                       Buy Packages
+                    </Button>
+                  </Link>
+                  <Link href="/profile/feedback">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-white hover:bg-white/10"
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Feedback
+                    </Button>
+                  </Link>
+                  <Link href="/profile/help-feedback">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-white hover:bg-white/10"
+                    >
+                      <HelpCircle className="h-4 w-4 mr-2" />
+                      Help & Feedback
                     </Button>
                   </Link>
                   <Button

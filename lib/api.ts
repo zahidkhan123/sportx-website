@@ -41,14 +41,47 @@ api.interceptors.response.use(
   }
 );
 
+// Location API
+export const locationAPI = {
+  getCountries: async () => {
+    const response = await api.get("/api/location/countries");
+    return response.data;
+  },
+  getStatesByCountry: async (countryCode: string) => {
+    const response = await api.get(
+      `/api/location/countries/${countryCode}/states`
+    );
+    return response.data;
+  },
+  getCitiesByState: async (countryCode: string, stateCode: string) => {
+    const response = await api.get(
+      `/api/location/countries/${countryCode}/states/${stateCode}/cities`
+    );
+    return response.data;
+  },
+  getCitiesByCountry: async (countryCode: string) => {
+    const response = await api.get(
+      `/api/location/countries/${countryCode}/cities`
+    );
+    return response.data;
+  },
+};
+
 // Auth API
 export const authAPI = {
   register: async (data: {
-    name: string;
+    fullName: string;
     email: string;
     password: string;
-    city?: string;
-    gender?: string;
+    confirmPassword: string;
+    phoneNumber?: string;
+    phone?: string;
+    country: string;
+    state: string;
+    city: string;
+    role: string[]; // Backend expects array
+    gender: string;
+    favoriteSports: string[];
   }) => {
     const response = await api.post("/api/auth/register", data);
     return response.data;
@@ -119,6 +152,12 @@ export const listingsAPI = {
     city?: string;
   }) => {
     const response = await api.get("/api/listings", { params });
+    return response.data;
+  },
+  getGroupedBySportsType: async (limit: number = 6, city?: string) => {
+    const params: any = { limit };
+    if (city) params.city = city;
+    const response = await api.get("/api/listings/grouped-by-sports", { params });
     return response.data;
   },
   getById: async (id: string) => {
@@ -223,8 +262,9 @@ export const marketplaceAPI = {
     const response = await api.get("/api/marketplace/user/my-ads", { params });
     return response.data;
   },
-  getFeatured: async () => {
-    const response = await api.get("/api/marketplace/featured");
+  getFeatured: async (location?: string) => {
+    const params = location ? { location } : {};
+    const response = await api.get("/api/marketplace/featured", { params });
     return response.data;
   },
   getCategories: async () => {
@@ -243,8 +283,10 @@ export const marketplaceAPI = {
     const response = await api.post(`/api/marketplace/${id}/report`);
     return response.data;
   },
-  getGroupedBySportsType: async (limit?: number) => {
-    const params = limit ? { limit: limit.toString() } : {};
+  getGroupedBySportsType: async (limit?: number, location?: string) => {
+    const params: Record<string, string> = {};
+    if (limit) params.limit = limit.toString();
+    if (location) params.location = location;
     const response = await api.get("/api/marketplace/grouped-by-sports", {
       params,
     });
@@ -385,6 +427,66 @@ export const uploadAPI = {
   },
 };
 
+// Chat API
+export const chatAPI = {
+  getOrCreateChat: async (contextType: "LISTING" | "PRODUCT", contextId: string) => {
+    const response = await api.post(`/api/chats/${contextType}/${contextId}`);
+    return response.data;
+  },
+  getChats: async (params?: { status?: string; contextType?: string }) => {
+    const response = await api.get("/api/chats", { params });
+    return response.data;
+  },
+  getChatById: async (chatId: string) => {
+    const response = await api.get(`/api/chats/${chatId}`);
+    return response.data;
+  },
+  closeChat: async (chatId: string) => {
+    const response = await api.patch(`/api/chats/${chatId}/close`);
+    return response.data;
+  },
+  getMessages: async (
+    chatId: string,
+    params?: { limit?: number; before?: string }
+  ) => {
+    const response = await api.get(`/api/chats/${chatId}/messages`, { params });
+    return response.data;
+  },
+  sendMessage: async (
+    chatId: string,
+    content: string,
+    messageType: "text" | "file" | "system" = "text"
+  ) => {
+    const response = await api.post(`/api/chats/${chatId}/messages`, {
+      content,
+      messageType,
+    });
+    return response.data;
+  },
+  reportChat: async (
+    chatId: string,
+    reason: string,
+    description?: string
+  ) => {
+    const response = await api.post(`/api/chats/${chatId}/report`, {
+      reason,
+      description,
+    });
+    return response.data;
+  },
+  reportMessage: async (
+    messageId: string,
+    reason: string,
+    description?: string
+  ) => {
+    const response = await api.post(
+      `/api/chats/messages/${messageId}/report`,
+      { reason, description }
+    );
+    return response.data;
+  },
+};
+
 // Packages API
 export const packagesAPI = {
   getAll: async () => {
@@ -412,6 +514,37 @@ export const packagesAPI = {
   },
   useFeature: async (adId: string) => {
     const response = await api.post(`/api/listings/use-feature/${adId}`);
+    return response.data;
+  },
+};
+
+// Feedback API (rating form from app/website)
+export const feedbackAPI = {
+  submit: async (data: {
+    rating: number;
+    tags?: string[];
+    message?: string;
+    featureRequest?: string;
+    allowContact: boolean;
+    platform: string;
+    appVersion?: string;
+  }) => {
+    const response = await api.post("/api/feedback", data);
+    return response.data;
+  },
+};
+
+// Support / Help & Feedback API (contact form)
+export const supportAPI = {
+  submitContact: async (data: {
+    type: "help" | "feedback";
+    subject: string;
+    message: string;
+    userId?: string;
+    userEmail?: string;
+    userName?: string;
+  }) => {
+    const response = await api.post("/api/support/contact", data);
     return response.data;
   },
 };

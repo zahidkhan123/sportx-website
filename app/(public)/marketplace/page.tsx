@@ -21,34 +21,51 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, X, DollarSign, MapPin, Tag, Plus, ChevronRight } from "lucide-react";
 import { authService } from "@/lib/auth";
-import { AuthModal } from "@/components/AuthModal";
+import { useLocation } from "@/contexts/LocationContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function MarketplacePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
-  const [location, setLocation] = useState("");
   const [minPrice, setMinPrice] = useState<number>();
   const [maxPrice, setMaxPrice] = useState<number>();
   const [condition, setCondition] = useState<"New" | "Used" | "">("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const { selectedLocation } = useLocation();
 
   useEffect(() => {
     setIsAuthenticated(authService.isAuthenticated());
   }, []);
 
+  // Listen for location changes and invalidate queries
+  useEffect(() => {
+    const handleLocationChange = () => {
+      // Invalidate queries to refetch with new location
+      queryClient.invalidateQueries({ queryKey: ["marketplace-grouped"] });
+      queryClient.invalidateQueries({ queryKey: ["marketplace-filtered"] });
+    };
+    window.addEventListener('locationChanged', handleLocationChange);
+    return () => window.removeEventListener('locationChanged', handleLocationChange);
+  }, [queryClient]);
+
+  // Get location filter value (empty string for "all", city name for specific cities)
+  const locationFilter = selectedLocation.value === 'all' 
+    ? '' 
+    : selectedLocation.city || selectedLocation.label;
+
   const handleCreateAd = () => {
     if (isAuthenticated) {
       router.push("/add-listing");
     } else {
-      setAuthModalOpen(true);
+      router.push("/signup");
     }
   };
 
   // Check if filters are applied
   const hasFilters = Boolean(
-    category || location || condition || minPrice || maxPrice || search
+    category || locationFilter || condition || minPrice || maxPrice || search
   );
 
   // Fetch grouped listings by sports type (only when no filters)
@@ -64,7 +81,7 @@ export default function MarketplacePage() {
       "marketplace-filtered",
       search,
       category,
-      location,
+      locationFilter,
       minPrice,
       maxPrice,
       condition,
@@ -75,7 +92,7 @@ export default function MarketplacePage() {
         limit: 50,
         search,
         category,
-        location,
+        location: locationFilter,
         minPrice,
         maxPrice,
         condition: condition || undefined,
@@ -101,15 +118,6 @@ export default function MarketplacePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <AuthModal
-        open={authModalOpen}
-        onOpenChange={setAuthModalOpen}
-        defaultTab="signup"
-        onSuccess={() => {
-          setIsAuthenticated(true);
-          router.push("/add-listing");
-        }}
-      />
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold text-white mb-2">Marketplace</h1>
@@ -154,13 +162,12 @@ export default function MarketplacePage() {
                 <Filter className="h-5 w-5 text-[#00FFA3]" />
                 <h3 className="text-lg font-semibold text-white">Filters</h3>
               </div>
-              {(category || location || condition || minPrice || maxPrice) && (
+              {(category || locationFilter || condition || minPrice || maxPrice) && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
                     setCategory("");
-                    setLocation("");
                     setCondition("");
                     setMinPrice(undefined);
                     setMaxPrice(undefined);
@@ -214,21 +221,6 @@ export default function MarketplacePage() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              {/* Location Filter */}
-              <div className="space-y-2">
-                <Label className="text-white text-sm font-medium flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-[#00FFA3]" />
-                  Location
-                </Label>
-                <Input
-                  type="text"
-                  placeholder="Enter location..."
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="h-11 bg-white/5 border-white/10 text-white placeholder:text-white/50 focus:border-[#00FFA3]"
-                />
               </div>
 
               {/* Condition Filter */}

@@ -1,146 +1,173 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SocialLoginButtons } from '@/components/SocialLoginButtons';
-import { authService } from '@/lib/auth';
-import { CITIES, GENDERS } from '@/lib/constants';
-import { toast } from 'sonner';
+import { SPORTS } from '@/lib/constants';
+import { cn } from '@/lib/utils';
+import { InterestsStep } from '@/components/signup/InterestsStep';
+import { BasicInfoStep } from '@/components/signup/BasicInfoStep';
+import { ProfileDetailsStep } from '@/components/signup/ProfileDetailsStep';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    city: '',
-    gender: '',
-  });
-  const [loading, setLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState<'interests' | 'basic' | 'profile'>('interests');
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // authService.register already stores token and user in localStorage
-      await authService.register(formData);
-      toast.success('Account created! Please verify your email with the OTP sent to you.');
-      // Redirect to OTP verification page
-      router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}&type=register`);
-    } catch (error: any) {
-      toast.error(error.message || 'Registration failed');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    // Check if user is already authenticated
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        router.push('/home');
+      }
     }
+  }, [router]);
+
+  const handleInterestsComplete = (interests: string[]) => {
+    setSelectedInterests(interests);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('selectedInterests', JSON.stringify(interests));
+    }
+    setCurrentStep('basic');
+  };
+
+  const handleBasicInfoComplete = () => {
+    setCurrentStep('profile');
+  };
+
+  const handleBackToInterests = () => {
+    setCurrentStep('interests');
+  };
+
+  const handleBackToBasic = () => {
+    setCurrentStep('basic');
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black p-4">
       <Card className="glass-card w-full max-w-md border-white/10">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-white">
-            Join <span className="text-[#00FFFF]">Sport</span>X
+          <CardTitle className="text-2xl font-bold text-white text-center">
+            {currentStep === 'interests' && (
+              <>
+                Join <span className="text-[#00FFFF]">Sport</span>X
+              </>
+            )}
+            {currentStep === 'basic' && (
+              <>
+                Create your <span className="text-[#00FFFF]">Sport</span>X Account
+              </>
+            )}
+            {currentStep === 'profile' && (
+              <>
+                Complete Your <span className="text-[#00FFFF]">Profile</span>
+              </>
+            )}
           </CardTitle>
-          <CardDescription className="text-white/70">
-            Create your account to get started
+          <CardDescription className="text-white/70 text-center">
+            {currentStep === 'interests' && 'Select your favorite sports to personalize your experience'}
+            {currentStep === 'basic' && 'Step 1 of 2: Basic Information'}
+            {currentStep === 'profile' && 'Step 2 of 2: Profile Details'}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-white">Full Name</Label>
-              <Input
-                id="name"
-                placeholder="John Doe"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-white">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-white">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="city" className="text-white">City</Label>
-                <Select
-                  value={formData.city}
-                  onValueChange={(value) => setFormData({ ...formData, city: value })}
-                >
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                    <SelectValue placeholder="Select city" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-black border-white/10">
-                    {CITIES.map((city) => (
-                      <SelectItem key={city} value={city} className="text-white">
-                        {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          {/* Progress Indicator */}
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center",
+                currentStep === 'interests' 
+                  ? "bg-[#00FFFF]" 
+                  : "bg-[#00FFA3]"
+              )}>
+                {currentStep !== 'interests' ? (
+                  <span className="text-black text-sm font-bold">✓</span>
+                ) : (
+                  <span className="text-black text-sm font-bold">1</span>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="gender" className="text-white">Gender</Label>
-                <Select
-                  value={formData.gender}
-                  onValueChange={(value) => setFormData({ ...formData, gender: value })}
-                >
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-black border-white/10">
-                    {GENDERS.map((gender) => (
-                      <SelectItem key={gender} value={gender.toLowerCase()} className="text-white">
-                        {gender}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <span className={cn(
+                "text-sm font-semibold",
+                currentStep === 'interests' ? "text-[#00FFFF]" : "text-[#00FFA3]"
+              )}>
+                Interests
+              </span>
             </div>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#00FFFF] text-black hover:bg-[#00FFFF]/90"
-            >
-              {loading ? 'Creating account...' : 'Sign Up'}
-            </Button>
+            <div className="flex-1 h-0.5 bg-white/10"></div>
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center",
+                currentStep === 'basic'
+                  ? "bg-[#00FFFF]"
+                  : currentStep === 'profile'
+                  ? "bg-[#00FFA3]"
+                  : "bg-white/10"
+              )}>
+                {currentStep === 'profile' ? (
+                  <span className="text-black text-sm font-bold">✓</span>
+                ) : (
+                  <span className={cn(
+                    "text-sm font-bold",
+                    currentStep === 'basic' ? "text-black" : "text-white"
+                  )}>2</span>
+                )}
+              </div>
+              <span className={cn(
+                "text-sm font-semibold",
+                currentStep === 'basic' 
+                  ? "text-[#00FFFF]" 
+                  : currentStep === 'profile'
+                  ? "text-[#00FFA3]"
+                  : "text-white/50"
+              )}>
+                Sign Up
+              </span>
+            </div>
+            <div className="flex-1 h-0.5 bg-white/10"></div>
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center",
+                currentStep === 'profile'
+                  ? "bg-[#00FFFF]"
+                  : "bg-white/10"
+              )}>
+                <span className={cn(
+                  "text-sm font-bold",
+                  currentStep === 'profile' ? "text-black" : "text-white"
+                )}>3</span>
+              </div>
+              <span className={cn(
+                "text-sm font-semibold",
+                currentStep === 'profile' ? "text-[#00FFFF]" : "text-white/50"
+              )}>
+                Profile
+              </span>
+            </div>
+          </div>
 
-            <SocialLoginButtons
-              onSuccess={() => {
-                router.push('/home');
-              }}
+          {/* Step Content */}
+          {currentStep === 'interests' && (
+            <InterestsStep onComplete={handleInterestsComplete} />
+          )}
+
+          {currentStep === 'basic' && (
+            <BasicInfoStep 
+              onComplete={handleBasicInfoComplete}
+              onBack={handleBackToInterests}
             />
-          </form>
-          <div className="mt-4 text-center text-sm text-white/70">
+          )}
+
+          {currentStep === 'profile' && (
+            <ProfileDetailsStep 
+              onBack={handleBackToBasic}
+            />
+          )}
+
+          {/* Login Link */}
+          <div className="mt-6 text-center text-sm text-white/70">
             Already have an account?{' '}
             <Link href="/login" className="text-[#00FFFF] hover:underline">
               Sign in
@@ -151,4 +178,3 @@ export default function SignupPage() {
     </div>
   );
 }
-

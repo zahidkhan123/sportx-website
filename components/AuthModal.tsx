@@ -234,22 +234,9 @@ function AuthModalContent({
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      await authService.register(signupData);
-      toast.success("Account created successfully!");
-      onOpenChange(false);
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        router.refresh();
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Registration failed");
-    } finally {
-      setLoading(false);
-    }
+    // Redirect to the new multi-step signup flow
+    onOpenChange(false);
+    router.push("/interests");
   };
 
   return (
@@ -363,9 +350,7 @@ function AuthModalContent({
                 <span className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-black px-2 text-white/70">
-                  Or continue with
-                </span>
+                <span className="bg-black px-2 text-white/70">Or</span>
               </div>
             </div>
 
@@ -560,9 +545,7 @@ function AuthModalContent({
                 <span className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-black px-2 text-white/70">
-                  Or continue with
-                </span>
+                <span className="bg-black px-2 text-white/70">Or</span>
               </div>
             </div>
 

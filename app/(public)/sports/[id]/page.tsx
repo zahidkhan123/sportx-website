@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { listingsAPI } from "@/lib/api";
+import { listingsAPI, chatAPI } from "@/lib/api";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +26,15 @@ export default function ListingDetailsPage() {
   const router = useRouter();
   const listingId = params.id as string;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [chatLoading, setChatLoading] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const userStr = localStorage.getItem("user");
+      if (userStr) setCurrentUser(JSON.parse(userStr));
+    }
+  }, []);
 
   const { data, isLoading } = useQuery({
     queryKey: ["listing", listingId],
@@ -581,6 +591,34 @@ export default function ListingDetailsPage() {
                     View →
                   </Button>
                 </div>
+                {currentUser &&
+                  (user._id || listing.userId)?.toString() !==
+                    (currentUser._id || currentUser.id)?.toString() && (
+                    <Button
+                      onClick={async () => {
+                        setChatLoading(true);
+                        try {
+                          const res = await chatAPI.getOrCreateChat(
+                            "LISTING",
+                            listingId
+                          );
+                          const chat = res?.data?.chat;
+                          if (chat) router.push(`/chats/${chat._id}`);
+                        } catch (e: any) {
+                          toast.error(
+                            e?.response?.data?.message || "Could not start chat"
+                          );
+                        } finally {
+                          setChatLoading(false);
+                        }
+                      }}
+                      disabled={chatLoading}
+                      className="mt-3 w-full bg-[#00FFA3] text-black hover:bg-[#00FFA3]/90"
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      {chatLoading ? "Opening..." : "Chat with owner"}
+                    </Button>
+                  )}
               </CardContent>
             </Card>
 
