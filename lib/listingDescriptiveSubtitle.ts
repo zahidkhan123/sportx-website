@@ -49,6 +49,8 @@ export function generateDescriptiveSubtitle(
   const data = (listing.data as Record<string, unknown>) || {};
   const listingType = listing.listingType as string | undefined;
   const location = getLocationString(listing);
+  // Get intent: AVAILABLE or LOOKING_FOR (defaults to AVAILABLE for backward compatibility)
+  const intent = (data.intent as string) || "AVAILABLE";
 
   switch (listingType) {
     case "player": {
@@ -81,13 +83,7 @@ export function generateDescriptiveSubtitle(
       ) {
         position = `All-rounder (${bowlingStyle})`;
       }
-      const lookingForTeam =
-        data.lookingForTeam !== undefined
-          ? Boolean(data.lookingForTeam)
-          : data.available !== undefined
-            ? !data.available
-            : true;
-      if (lookingForTeam) {
+      if (intent === "LOOKING_FOR") {
         return `${playerName} is looking for a Team to join as a ${position}${location ? ` in ${location}` : ""}`;
       }
       return `${playerName} is available as a ${position}${location ? ` in ${location}` : ""}`;
@@ -96,42 +92,39 @@ export function generateDescriptiveSubtitle(
       const teamName =
         (data.teamName as string) || (data.name as string) || "their team";
       const lookingForOpponent = Boolean(data.lookingForOpponent);
-      const lookingForPlayers =
-        data.lookingForPlayers !== undefined
-          ? Boolean(data.lookingForPlayers)
-          : true;
       let position =
         (data.lookingForPosition as string) ||
         (data.position as string) ||
         (data.lookingFor as string) ||
         "players";
-      if (lookingForOpponent) {
-        const matchDate =
-          data.matchDate || data.date
-            ? formatDateForDisplay(data.matchDate ?? data.date)
-            : "";
-        return `${userName} is looking for an opponent to play a match with ${teamName}${location ? ` in ${location}` : ""}${matchDate ? ` on ${matchDate}` : ""}`;
-      }
-      if (lookingForPlayers && position && position !== "players") {
-        const bowlingStyle = (data.bowlingStyle as string) || "";
-        const battingStyle = (data.battingStyle as string) || "";
-        if (
-          bowlingStyle &&
-          (position.includes("Bowler") || position === "Bowler")
-        ) {
-          position = `${position} (${bowlingStyle})`;
-        } else if (
-          battingStyle &&
-          (position.includes("Batsman") || position === "Batsman")
-        ) {
-          position = `${position} (${battingStyle})`;
-        } else if (bowlingStyle && position === "All-rounder") {
-          position = `All-rounder (${bowlingStyle})`;
+      
+      if (intent === "LOOKING_FOR") {
+        if (lookingForOpponent) {
+          const matchDate =
+            data.matchDate || data.date
+              ? formatDateForDisplay(data.matchDate ?? data.date)
+              : "";
+          return `${userName} is looking for an opponent to play a match with ${teamName}${location ? ` in ${location}` : ""}${matchDate ? ` on ${matchDate}` : ""}`;
         }
-        return `${userName} is looking for a ${position} to join ${teamName}${location ? ` in ${location}` : ""}`;
-      }
-      if (lookingForPlayers) {
-        return `${userName} is looking for players to join his team (${teamName})${location ? ` in ${location}` : ""}`;
+        if (position && position !== "players") {
+          const bowlingStyle = (data.bowlingStyle as string) || "";
+          const battingStyle = (data.battingStyle as string) || "";
+          if (
+            bowlingStyle &&
+            (position.includes("Bowler") || position === "Bowler")
+          ) {
+            position = `${position} (${bowlingStyle})`;
+          } else if (
+            battingStyle &&
+            (position.includes("Batsman") || position === "Batsman")
+          ) {
+            position = `${position} (${battingStyle})`;
+          } else if (bowlingStyle && position === "All-rounder") {
+            position = `All-rounder (${bowlingStyle})`;
+          }
+          return `${userName} is looking for a ${position} to join ${teamName}${location ? ` in ${location}` : ""}`;
+        }
+        return `${userName} is looking for players to join ${teamName}${location ? ` in ${location}` : ""}`;
       }
       return `${userName} is managing ${teamName}${location ? ` in ${location}` : ""}`;
     }
@@ -163,17 +156,53 @@ export function generateDescriptiveSubtitle(
     case "ground": {
       const groundName =
         (data.groundName as string) || (data.name as string) || "a ground";
-      const lookingForBooking =
-        data.lookingForBooking !== undefined
-          ? Boolean(data.lookingForBooking)
-          : true;
-      const bookingDate = data.bookingDate
-        ? formatDateForDisplay(data.bookingDate)
-        : "";
-      if (lookingForBooking) {
+      
+      if (intent === "LOOKING_FOR") {
+        // Player looking for ground
+        const bookingDate = data.bookingDateAndTime || data.bookingDate
+          ? formatDateForDisplay((data.bookingDateAndTime || data.bookingDate) as string)
+          : "";
         return `${userName} is looking for ${groundName} to play${location ? ` in ${location}` : ""}${bookingDate ? ` on ${bookingDate}` : ""}`;
       }
-      return `${groundName} is available${location ? ` in ${location}` : ""}`;
+      
+      // Ground owner posting availability
+      const parts: string[] = [];
+      parts.push(`${groundName} is available for booking`);
+      
+      if (location) {
+        parts.push(`in ${location}`);
+      }
+      
+      // Add pricing information
+      const pricingParts: string[] = [];
+      if (data.hourlyRate) {
+        pricingParts.push(`PKR ${data.hourlyRate}/hour`);
+      }
+      if (data.dailyRate) {
+        pricingParts.push(`PKR ${data.dailyRate}/day`);
+      }
+      if (pricingParts.length > 0) {
+        parts.push(`(${pricingParts.join(", ")})`);
+      }
+      
+      // Add capacity
+      if (data.capacity) {
+        parts.push(`Capacity: ${data.capacity} players`);
+      }
+      
+      // Add availability details
+      const availabilityParts: string[] = [];
+      if (data.availableDays) {
+        availabilityParts.push(data.availableDays as string);
+      }
+      if (data.availableTimings) {
+        availabilityParts.push(data.availableTimings as string);
+      }
+      if (availabilityParts.length > 0) {
+        parts.push(`Available: ${availabilityParts.join(", ")}`);
+      }
+      
+      return parts.join(" · ");
     }
     case "coach": {
       const coachName =
@@ -192,39 +221,37 @@ export function generateDescriptiveSubtitle(
       const coachingTypeStr = Array.isArray(coachingType)
         ? coachingType.join(", ")
         : String(coachingType);
+      
+      if (intent === "LOOKING_FOR") {
+        return `${userName} is looking for a Coach${location ? ` in ${location}` : ""}${coachingTypeStr !== "Coaching" ? ` for ${coachingTypeStr}` : ""}`;
+      }
       return `${coachName} is offering ${coachingTypeStr}${location ? ` in ${location}` : ""}${experience}${availableDays ? ` (${availableDays})` : ""}`;
     }
     case "umpire":
     case "referee": {
-      const lookingForWork =
-        data.lookingForWork !== undefined ? Boolean(data.lookingForWork) : true;
       const experience = data.experience
         ? `${data.experience} years experience`
         : "";
-      if (lookingForWork) {
-        return `${userName} is looking for ${listingType} opportunities${location ? ` in ${location}` : ""}${experience ? ` (${experience})` : ""}`;
+      if (intent === "LOOKING_FOR") {
+        return `${userName} is looking for an ${listingType === "umpire" ? "Umpire" : "Referee"}${location ? ` in ${location}` : ""}`;
       }
       return `${userName} is an experienced ${listingType}${location ? ` in ${location}` : ""}${experience ? ` (${experience})` : ""}`;
     }
     case "scorer": {
-      const lookingForWork =
-        data.lookingForWork !== undefined ? Boolean(data.lookingForWork) : true;
       const experience = data.experience
         ? `${data.experience} years experience`
         : "";
-      if (lookingForWork) {
-        return `${userName} is looking for Scorer opportunities${location ? ` in ${location}` : ""}${experience ? ` (${experience})` : ""}`;
+      if (intent === "LOOKING_FOR") {
+        return `${userName} is looking for a Scorer${location ? ` in ${location}` : ""}`;
       }
       return `${userName} is an experienced Scorer${location ? ` in ${location}` : ""}${experience ? ` (${experience})` : ""}`;
     }
     case "commentator": {
-      const lookingForWork =
-        data.lookingForWork !== undefined ? Boolean(data.lookingForWork) : true;
       const experience = data.experience
         ? `${data.experience} years experience`
         : "";
-      if (lookingForWork) {
-        return `${userName} is looking for Commentator opportunities${location ? ` in ${location}` : ""}${experience ? ` (${experience})` : ""}`;
+      if (intent === "LOOKING_FOR") {
+        return `${userName} is looking for a Commentator${location ? ` in ${location}` : ""}`;
       }
       return `${userName} is an experienced Commentator${location ? ` in ${location}` : ""}${experience ? ` (${experience})` : ""}`;
     }

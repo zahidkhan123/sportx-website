@@ -244,6 +244,69 @@ export default function ListingDetailsPage() {
         const groundName = (data.groundName ||
           data.name ||
           "a ground") as string;
+        
+        // Detect if this is a ground owner post (has pricing/capacity fields)
+        // vs player looking for ground (has bookingDateAndTime)
+        const isGroundOwnerPost = 
+          data.hourlyRate !== undefined || 
+          data.dailyRate !== undefined || 
+          data.capacity !== undefined ||
+          (data.availableDays !== undefined && !data.bookingDateAndTime);
+        
+        const isPlayerLookingForGround = data.bookingDateAndTime !== undefined;
+        
+        // If player is looking for ground
+        if (isPlayerLookingForGround && !isGroundOwnerPost) {
+          const bookingDate = data.bookingDateAndTime
+            ? formatDateForDisplay(data.bookingDateAndTime as string)
+            : "";
+          return `${userName} is looking for ${groundName} to play${
+            loc ? ` in ${loc}` : ""
+          }${bookingDate ? ` on ${bookingDate}` : ""}`;
+        }
+        
+        // If ground owner is posting availability
+        if (isGroundOwnerPost) {
+          const parts: string[] = [];
+          parts.push(`${groundName} is available for booking`);
+          
+          if (loc) {
+            parts.push(`in ${loc}`);
+          }
+          
+          // Add pricing information
+          const pricingParts: string[] = [];
+          if (data.hourlyRate) {
+            pricingParts.push(`PKR ${data.hourlyRate}/hour`);
+          }
+          if (data.dailyRate) {
+            pricingParts.push(`PKR ${data.dailyRate}/day`);
+          }
+          if (pricingParts.length > 0) {
+            parts.push(`(${pricingParts.join(", ")})`);
+          }
+          
+          // Add capacity
+          if (data.capacity) {
+            parts.push(`Capacity: ${data.capacity} players`);
+          }
+          
+          // Add availability details
+          const availabilityParts: string[] = [];
+          if (data.availableDays) {
+            availabilityParts.push(data.availableDays as string);
+          }
+          if (data.availableTimings) {
+            availabilityParts.push(data.availableTimings as string);
+          }
+          if (availabilityParts.length > 0) {
+            parts.push(`Available: ${availabilityParts.join(", ")}`);
+          }
+          
+          return parts.join(" · ");
+        }
+        
+        // Fallback: check lookingForBooking flag (for backward compatibility)
         const lookingForBooking =
           data.lookingForBooking !== undefined ? data.lookingForBooking : true;
         const bookingDate = data.bookingDate

@@ -136,6 +136,8 @@ export function ListingCard({
     const userName = userId?.name || userId?.fullName || "Someone";
     const loc = getLocationString();
     const data = listingData;
+    // Get intent: AVAILABLE or LOOKING_FOR (defaults to AVAILABLE for backward compatibility)
+    const intent = (data.intent as string) || "AVAILABLE";
 
     switch (listingType) {
       case "player": {
@@ -169,14 +171,7 @@ export function ListingCard({
           positionStr = `All-rounder (${bowlingStyle})`;
         }
 
-        const lookingForTeam =
-          data.lookingForTeam !== undefined
-            ? data.lookingForTeam
-            : data.available !== undefined
-            ? !data.available
-            : true;
-
-        if (lookingForTeam) {
+        if (intent === "LOOKING_FOR") {
           return `${playerName} is looking for a Team to join as a ${positionStr}${
             loc ? ` in ${loc}` : ""
           }`;
@@ -277,19 +272,57 @@ export function ListingCard({
         const groundName = (data.groundName ||
           data.name ||
           "a ground") as string;
-        const lookingForBooking =
-          data.lookingForBooking !== undefined ? data.lookingForBooking : true;
-        const bookingDate = data.bookingDate
-          ? formatDateForDisplay(data.bookingDate as string)
-          : "";
-
-        if (lookingForBooking) {
+        
+        if (intent === "LOOKING_FOR") {
+          // Player looking for ground
+          const bookingDate = data.bookingDateAndTime || data.bookingDate
+            ? formatDateForDisplay((data.bookingDateAndTime || data.bookingDate) as string)
+            : "";
           return `${userName} is looking for ${groundName} to play${
             loc ? ` in ${loc}` : ""
           }${bookingDate ? ` on ${bookingDate}` : ""}`;
         }
-
-        return `${groundName} is available${loc ? ` in ${loc}` : ""}`;
+        
+        // Ground owner posting availability
+        {
+          const parts: string[] = [];
+          parts.push(`${groundName} is available for booking`);
+          
+          if (loc) {
+            parts.push(`in ${loc}`);
+          }
+          
+          // Add pricing information
+          const pricingParts: string[] = [];
+          if (data.hourlyRate) {
+            pricingParts.push(`PKR ${data.hourlyRate}/hour`);
+          }
+          if (data.dailyRate) {
+            pricingParts.push(`PKR ${data.dailyRate}/day`);
+          }
+          if (pricingParts.length > 0) {
+            parts.push(`(${pricingParts.join(", ")})`);
+          }
+          
+          // Add capacity
+          if (data.capacity) {
+            parts.push(`Capacity: ${data.capacity} players`);
+          }
+          
+          // Add availability details
+          const availabilityParts: string[] = [];
+          if (data.availableDays) {
+            availabilityParts.push(data.availableDays as string);
+          }
+          if (data.availableTimings) {
+            availabilityParts.push(data.availableTimings as string);
+          }
+          if (availabilityParts.length > 0) {
+            parts.push(`Available: ${availabilityParts.join(", ")}`);
+          }
+          
+          return parts.join(" · ");
+        }
       }
       case "coach": {
         const coachName = (data.coachName || data.name || userName) as string;
@@ -307,6 +340,11 @@ export function ListingCard({
           ? coachingType.join(", ")
           : coachingType;
 
+        if (intent === "LOOKING_FOR") {
+          return `${userName} is looking for a Coach${
+            loc ? ` in ${loc}` : ""
+          }${coachingTypeStr !== "Coaching" ? ` for ${coachingTypeStr}` : ""}`;
+        }
         return `${coachName} is offering ${coachingTypeStr}${
           loc ? ` in ${loc}` : ""
         }${experience}${availableDays ? ` (${availableDays})` : ""}`;
