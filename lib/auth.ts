@@ -11,6 +11,28 @@ export type User = {
 };
 
 export const authService = {
+  // Simple email/password signup (matches mobile flow)
+  signup: async (data: {
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }) => {
+    const response = await authAPI.signup(data);
+    if (response.success && response.data?.token) {
+      // Backend may return token/user under data
+      const token = response.data.token || response.data.accessToken;
+      const user = response.data.user;
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+      return response;
+    }
+    throw new Error(response.message || "Registration failed");
+  },
+
   register: async (data: {
     fullName: string;
     email: string;
@@ -143,6 +165,28 @@ export const authService = {
       return response.data;
     }
     throw new Error(response.message || 'Apple login failed');
+  },
+
+  completeProfile: async (profile: {
+    fullName: string;
+    username: string;
+    gender: string;
+    dob: string;
+    country: string;
+    city: string;
+    state: string;
+    area?: string;
+    phone: string;
+    whatsapp?: string;
+    favoriteSports: string[];
+    profileImage?: string;
+  }) => {
+    const response = await authAPI.completeProfile(profile);
+    if (response.success && response.data?.user) {
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      return response.data;
+    }
+    throw new Error(response.message || 'Failed to complete profile');
   },
 };
 

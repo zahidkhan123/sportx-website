@@ -69,6 +69,15 @@ export const locationAPI = {
 
 // Auth API
 export const authAPI = {
+  // Simple email/password signup (mobile-style)
+  signup: async (data: {
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }) => {
+    const response = await api.post("/api/auth/register", data);
+    return response.data;
+  },
   register: async (data: {
     fullName: string;
     email: string;
@@ -108,6 +117,23 @@ export const authAPI = {
   },
   resendOTP: async (email: string) => {
     const response = await api.post("/api/auth/resend-otp", { email });
+    return response.data;
+  },
+  completeProfile: async (profile: {
+    fullName: string;
+    username: string;
+    gender: string;
+    dob: string;
+    country: string;
+    city: string;
+    state: string;
+    area?: string;
+    phone: string;
+    whatsapp?: string;
+    favoriteSports: string[];
+    profileImage?: string;
+  }) => {
+    const response = await api.put("/api/auth/profile", profile);
     return response.data;
   },
   getProfile: async () => {
@@ -537,7 +563,7 @@ export const feedbackAPI = {
 // Support / Help & Feedback API (contact form)
 export const supportAPI = {
   submitContact: async (data: {
-    type: "help" | "feedback";
+    type: "help" | "feedback" | "contact";
     subject: string;
     message: string;
     userId?: string;

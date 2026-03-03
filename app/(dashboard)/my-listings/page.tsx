@@ -191,7 +191,7 @@ function AdsList({ ads, onDelete, onMarkSold, isLoading }: { ads: any[]; onDelet
             <h3 className="font-semibold text-white mb-2 line-clamp-2">{ad.title}</h3>
             <div className="flex items-center justify-between text-sm text-white/70 mb-4">
               <span>{ad.location}</span>
-              <span className="font-semibold text-[#39FF14]">${ad.price}</span>
+              <span className="font-semibold text-[#39FF14]">Rs. {ad.price}</span>
             </div>
             <div className="flex items-center gap-2">
               {ad.status === 'active' && (

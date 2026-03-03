@@ -308,7 +308,7 @@
 //             Ready to Get Started?
 //           </h2>
 //           <p className="text-white/70 mb-8 max-w-2xl mx-auto">
-//             Download the SportX app for iOS and Android to access all features
+//             Download the SportX360 app for iOS and Android to access all features
 //             on the go.
 //           </p>
 //           <div className="flex justify-center gap-4">
@@ -456,7 +456,7 @@ export default function HomePage() {
         background: "linear-gradient(180deg, #000000 0%, #0d0d3a 50%, #1a1a2e 100%)",
       }}
     >
-      <VerificationBanner />
+      {/* <VerificationBanner /> */}
 
       {/* ========== PREVIOUS HOME PAGE (commented out - do not remove) ==========
       <div className="min-h-screen">
@@ -542,7 +542,7 @@ export default function HomePage() {
           <div className="glass-card border-white/10 p-12 text-center">
             <h2 className="text-3xl font-bold text-white mb-4">Ready to Get Started?</h2>
             <p className="text-white/70 mb-8 max-w-2xl mx-auto">
-              Download the SportX app for iOS and Android to access all features on the go.
+              Download the SportX360 app for iOS and Android to access all features on the go.
             </p>
             <div className="flex justify-center gap-4">
               <Button size="lg" className="bg-[#00FFFF] text-black hover:bg-[#00FFFF]/90">
@@ -676,10 +676,10 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Responsive Display Ad */}
+          {/* Responsive Display Ad - horizontal banner between Quick Actions and Recent Sports Listings */}
           <section className="mb-14">
             <GoogleAds
-              adSlot="3814764721"
+              adSlot="6414155367"
               adFormat="auto"
               fullWidthResponsive={true}
               className="w-full"
@@ -699,7 +699,7 @@ export default function HomePage() {
                   <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
                     <div>
                       <h2 className="text-2xl font-bold text-white md:text-3xl">
-                        Featured Listings
+                        Recent Sports Listings
                       </h2>
                       <p className="mt-1 text-white/60">
                         What&apos;s happening near you
@@ -952,7 +952,7 @@ export default function HomePage() {
                       size="lg"
                     >
                       <PlusCircle className="mr-2 h-5 w-5" />
-                      Create Listing
+                      Post a Listing
                     </Button>
                   </Link>
                 </div>

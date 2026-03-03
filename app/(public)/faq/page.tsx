@@ -14,7 +14,7 @@ interface FAQItem {
 const faqData: FAQItem[] = [
   {
     question: 'How do I create an account?',
-    answer: 'Creating an account is easy! Click on "Sign Up" in the top navigation, fill in your details including name, email, password, city, and gender. After registration, you\'ll receive an OTP via email to verify your account. Once verified, you can start using all features of SportX.',
+    answer: 'Creating an account is easy! Click on "Sign Up" in the top navigation, fill in your details including name, email, password, city, and gender. After registration, you\'ll receive an OTP via email to verify your account. Once verified, you can start using all features of SportX360.',
   },
   {
     question: 'How do I list an item for sale?',
@@ -25,7 +25,7 @@ const faqData: FAQItem[] = [
     answer: 'Navigate to the Sports page and click "Create Listing". Select your sport type and listing type (player, team, tournament, etc.), then fill in the required details. Your listing will be visible to other users once created.',
   },
   {
-    question: 'Is it free to use SportX?',
+    question: 'Is it free to use SportX360?',
     answer: 'Yes! Creating an account and browsing listings is completely free. You can create listings, browse marketplace items, and connect with other users at no cost. Some premium features may be available for verified sellers.',
   },
   {
@@ -38,7 +38,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: 'What payment methods are accepted?',
-    answer: 'SportX is a marketplace platform that connects buyers and sellers. Payment arrangements are made directly between buyers and sellers. We recommend using secure payment methods and meeting in person when possible for equipment purchases.',
+    answer: 'SportX360 is a marketplace platform that connects buyers and sellers. Payment arrangements are made directly between buyers and sellers. We recommend using secure payment methods and meeting in person when possible for equipment purchases.',
   },
   {
     question: 'How do I report a problem?',
@@ -54,7 +54,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: 'What sports are supported?',
-    answer: 'SportX supports a wide range of sports including Cricket, Football, Tennis, Badminton, Basketball, Volleyball, Hockey, Gym, Swimming, Athletics, and many more. You can filter listings by sport type to find exactly what you\'re looking for.',
+    answer: 'SportX360 supports a wide range of sports including Cricket, Football, Tennis, Badminton, Basketball, Volleyball, Hockey, Gym, Swimming, Athletics, and many more. You can filter listings by sport type to find exactly what you\'re looking for.',
   },
   {
     question: 'How do I become a featured seller?',
@@ -79,7 +79,7 @@ export default function FAQPage() {
               Frequently Asked <span className="text-[#00FFFF]">Questions</span>
             </h1>
             <p className="text-xl text-white/70">
-              Find answers to common questions about SportX
+              Find answers to common questions about SportX360
             </p>
           </div>
 

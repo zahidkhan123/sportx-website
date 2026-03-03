@@ -28,7 +28,7 @@ export default function ChatsLayout({
       const res = await chatAPI.getChats();
       const list = res?.data?.chats ?? [];
       setChats(list);
-      const total = list.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
+      const total = list.reduce((sum: number, c: { unreadCount?: number }) => sum + (c.unreadCount ?? 0), 0);
       setTotalUnread(total);
     } catch {
       setChats([]);

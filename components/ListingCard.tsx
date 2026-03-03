@@ -443,8 +443,8 @@ export function ListingCard({
           <div className="flex items-center gap-4 mb-3">
             <div className="relative w-12 h-12 flex-shrink-0">
               <Image
-                src={profilePicUrl}
-                // alt={name}
+                src={profilePicUrl as string}
+                alt={name as string}
                 width={48}
                 height={48}
                 className="rounded-full object-cover"

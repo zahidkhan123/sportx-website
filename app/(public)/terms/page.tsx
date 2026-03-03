@@ -10,242 +10,139 @@ export default function TermsOfServicePage() {
           {/* Header */}
           <div className="mb-12 text-center">
             <h1 className="text-5xl font-bold text-white mb-4">
-              Terms of <span className="text-[#00FFFF]">Service</span>
+              Terms & <span className="text-[#00FFFF]">Conditions</span>
             </h1>
             <p className="text-white/70">
-              Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              Last updated: February 2025
             </p>
           </div>
 
           {/* Introduction */}
           <section className="mb-8">
             <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              Welcome to SportX. These Terms of Service ("Terms") govern your access to and use of 
-              our platform, services, and applications (collectively, the "Service"). By accessing 
-              or using our Service, you agree to be bound by these Terms. If you disagree with any 
-              part of these terms, then you may not access the Service.
+              These Terms & Conditions (&quot;Terms&quot;) govern your access to and use of the SportX360 mobile application and related services (&quot;Services&quot;) operated by SportX360 (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). This app is intended for users in Pakistan. By accessing or using the SportX360 app, you agree to be bound by these Terms. If you do not agree, do not use our Services.
             </p>
           </section>
 
-          {/* Acceptance of Terms */}
+          {/* 1. Acceptance of Terms */}
           <section className="mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <CheckCircle className="h-6 w-6 text-[#00FFFF]" />
-              <h2 className="text-3xl font-bold text-white">Acceptance of Terms</h2>
+              <h2 className="text-3xl font-bold text-white">1. Acceptance of Terms</h2>
             </div>
-            <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              By creating an account, accessing, or using SportX, you acknowledge that you have read, 
-              understood, and agree to be bound by these Terms and our Privacy Policy. If you do not 
-              agree to these Terms, you must not use our Service.
+            <p className="text-white/70 leading-relaxed text-left max-w-2xl mx-auto">
+              By creating an account, accessing, or using the SportX360 app and Services (including listings, marketplace, and communications), you agree to be bound by these Terms and our Privacy Policy. If you are using the Services on behalf of an organization, you represent that you have authority to bind that organization to these Terms.
             </p>
           </section>
 
-          {/* Eligibility */}
-          <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">Eligibility</h2>
-            <div className="space-y-2 text-white/70 text-left max-w-2xl mx-auto">
-              <p>To use SportX, you must:</p>
-              <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>Be at least 13 years of age (or the age of majority in your jurisdiction)</li>
-                <li>Have the legal capacity to enter into binding agreements</li>
-                <li>Provide accurate, current, and complete information during registration</li>
-                <li>Maintain and update your information to keep it accurate</li>
-                <li>Not have been previously suspended or removed from our Service</li>
-              </ul>
-            </div>
-          </section>
-
-          {/* User Accounts */}
-          <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">User Accounts</h2>
-            <div className="space-y-4 text-white/70 text-left max-w-2xl mx-auto">
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Account Creation</h3>
-                <p>
-                  You are responsible for maintaining the confidentiality of your account credentials 
-                  and for all activities that occur under your account. You agree to notify us 
-                  immediately of any unauthorized use of your account.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Account Security</h3>
-                <p>
-                  You are responsible for safeguarding your password and for any activities or actions 
-                  under your account. We cannot and will not be liable for any loss or damage arising 
-                  from your failure to comply with this requirement.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Use of Service */}
+          {/* 2. Use License */}
           <section className="mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <FileText className="h-6 w-6 text-[#00FFFF]" />
-              <h2 className="text-3xl font-bold text-white">Use of Service</h2>
-            </div>
-            <div className="space-y-4 text-white/70 text-left max-w-2xl mx-auto">
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Permitted Use</h3>
-                <p>You may use our Service for lawful purposes only and in accordance with these Terms.</p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Prohibited Activities</h3>
-                <p className="mb-2">You agree not to:</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Violate any applicable laws or regulations</li>
-                  <li>Infringe upon the rights of others</li>
-                  <li>Post false, misleading, or fraudulent information</li>
-                  <li>Harass, abuse, or harm other users</li>
-                  <li>Spam or send unsolicited communications</li>
-                  <li>Attempt to gain unauthorized access to our systems</li>
-                  <li>Interfere with or disrupt the Service</li>
-                  <li>Use automated systems to access the Service without permission</li>
-                  <li>Impersonate any person or entity</li>
-                  <li>Collect user information without consent</li>
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          {/* Marketplace and Listings */}
-          <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">Marketplace and Listings</h2>
-            <div className="space-y-4 text-white/70 text-left max-w-2xl mx-auto">
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Listing Items</h3>
-                <p>
-                  When you create a listing, you represent and warrant that you have the right to sell 
-                  the item and that all information provided is accurate. You are responsible for your 
-                  listings and any transactions that result from them.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Transactions</h3>
-                <p>
-                  SportX facilitates connections between buyers and sellers but is not a party to any 
-                  transaction. All transactions are between users, and SportX is not responsible for 
-                  the quality, safety, or legality of items listed or the accuracy of listings.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Payment</h3>
-                <p>
-                  Payment arrangements are made directly between buyers and sellers. SportX does not 
-                  process payments or handle transactions. We recommend using secure payment methods 
-                  and meeting in person when possible.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Content and Intellectual Property */}
-          <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">Content and Intellectual Property</h2>
-            <div className="space-y-4 text-white/70 text-left max-w-2xl mx-auto">
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Your Content</h3>
-                <p>
-                  You retain ownership of any content you post on SportX. By posting content, you 
-                  grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, 
-                  modify, and distribute your content for the purpose of operating and promoting 
-                  our Service.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Our Content</h3>
-                <p>
-                  The Service and its original content, features, and functionality are owned by 
-                  SportX and are protected by international copyright, trademark, patent, trade 
-                  secret, and other intellectual property laws.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Disclaimers */}
-          <section className="mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <AlertCircle className="h-6 w-6 text-[#00FFFF]" />
-              <h2 className="text-3xl font-bold text-white">Disclaimers</h2>
+              <h2 className="text-3xl font-bold text-white">2. Use License</h2>
             </div>
             <div className="space-y-2 text-white/70 text-left max-w-2xl mx-auto">
-              <p>The Service is provided "as is" and "as available" without warranties of any kind, 
-              either express or implied. We do not warrant that:</p>
+              <p>
+                We grant you a limited, non-exclusive, non-transferable, revocable license to use the SportX360 app for personal or commercial use in accordance with these Terms. You may not copy, modify, distribute, reverse-engineer, or create derivative works of the app or its content without our prior written permission.
+              </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>The Service will be uninterrupted or error-free</li>
-                <li>Defects will be corrected</li>
-                <li>The Service is free of viruses or other harmful components</li>
-                <li>The information on the Service is accurate or complete</li>
+                <li>Use the app only for lawful purposes and in compliance with applicable laws</li>
+                <li>Do not reverse-engineer or attempt to extract source code or underlying data</li>
+                <li>Respect intellectual property rights of SportX360 and third parties</li>
               </ul>
             </div>
           </section>
 
-          {/* Limitation of Liability */}
+          {/* 3. User Accounts */}
           <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">Limitation of Liability</h2>
-            <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              To the maximum extent permitted by law, SportX shall not be liable for any indirect, 
-              incidental, special, consequential, or punitive damages, or any loss of profits or 
-              revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, 
-              or other intangible losses resulting from your use of the Service.
+            <h2 className="text-3xl font-bold text-white mb-4 text-center">3. User Accounts</h2>
+            <p className="text-white/70 leading-relaxed text-left max-w-2xl mx-auto">
+              You are responsible for maintaining the confidentiality of your account credentials and for all activity under your account. You agree to provide accurate and complete information and to notify us promptly of any unauthorized use. We reserve the right to suspend or terminate accounts that violate these Terms or that we reasonably believe pose a risk to the Services or other users.
             </p>
           </section>
 
-          {/* Indemnification */}
+          {/* 4. Listings & Marketplace */}
           <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">Indemnification</h2>
-            <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              You agree to defend, indemnify, and hold harmless SportX and its officers, directors, 
-              employees, and agents from and against any claims, liabilities, damages, losses, and 
-              expenses, including reasonable attorney's fees, arising out of or in any way connected 
-              with your access to or use of the Service or your violation of these Terms.
+            <h2 className="text-3xl font-bold text-white mb-4 text-center">4. Listings & Marketplace</h2>
+            <div className="space-y-4 text-white/70 text-left max-w-2xl mx-auto">
+              <p>
+                Listings (players, teams, tournaments, grounds, officials) and marketplace ads (buy/sell gear) posted through the app are subject to our applicable policies. You represent that you have the right to post listings or ads and that the information you provide is accurate. You are responsible for the condition and accuracy of your listings and ads. We may remove or reject content that violates our policies or applicable law in Pakistan.
+              </p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>Accurate description of listings, ads, and pricing</li>
+                <li>Compliance with laws and regulations in Pakistan</li>
+              </ul>
+              <p>
+                We do not process, facilitate, or take responsibility for any payments between users. Any payment or transaction you conduct with another user (e.g. for marketplace items) is at your own risk. We are not liable for disputes, fraud, non-payment, or any loss arising from such transactions. You deal with other users at your own risk.
+              </p>
+            </div>
+          </section>
+
+          {/* 5. Prohibited Uses */}
+          <section className="mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <AlertCircle className="h-6 w-6 text-[#00FFFF]" />
+              <h2 className="text-3xl font-bold text-white">5. Prohibited Uses</h2>
+            </div>
+            <div className="space-y-2 text-white/70 text-left max-w-2xl mx-auto">
+              <p>
+                You may not use the SportX360 app to harass others, post false or misleading content, circumvent security measures, or engage in illegal or harmful activity. We have a zero-tolerance policy for hate speech, threats, promotion of violence, or other abusive or illegal behavior. We may suspend or terminate access for violations.
+              </p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>No spam, fraud, abuse, or impersonation</li>
+                <li>No hate speech, discrimination, or harassment</li>
+                <li>No threats, promotion of violence, or self-harm content</li>
+                <li>No illegal content, including criminal activity or exploitation</li>
+                <li>No false or misleading information in listings or marketplace</li>
+                <li>No misuse of other users&apos; data or the Services</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* 6. Limitation of Liability */}
+          <section className="mb-8">
+            <h2 className="text-3xl font-bold text-white mb-4 text-center">6. Limitation of Liability</h2>
+            <p className="text-white/70 leading-relaxed text-left max-w-2xl mx-auto">
+              To the maximum extent permitted by applicable law in Pakistan, SportX360 and its affiliates, officers, directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, or punitive damages (including loss of data, revenue, or profits) arising from your use of or inability to use the Services, or from any payment or transaction between you and other users—all such transactions are at your own risk. Our total liability shall not exceed the amount you paid us, if any, in the twelve (12) months preceding the claim. Where the law of Pakistan does not allow certain limitations, our liability will be limited to the fullest extent permitted by law.
             </p>
           </section>
 
-          {/* Termination */}
+          {/* 7. Disclaimer of Warranties */}
+          <section className="mb-8">
+            <h2 className="text-3xl font-bold text-white mb-4 text-center">7. Disclaimer of Warranties</h2>
+            <p className="text-white/70 leading-relaxed text-left max-w-2xl mx-auto">
+              The Services are provided &quot;as is&quot; and &quot;as available&quot; without warranties of any kind, either express or implied. We do not warrant that the Services will be uninterrupted, error-free, or free of harmful components. Your use of the Services is at your sole risk.
+            </p>
+          </section>
+
+          {/* 8. Changes to Terms */}
           <section className="mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <XCircle className="h-6 w-6 text-[#00FFFF]" />
-              <h2 className="text-3xl font-bold text-white">Termination</h2>
+              <h2 className="text-3xl font-bold text-white">8. Changes to Terms</h2>
             </div>
-            <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              We may terminate or suspend your account and access to the Service immediately, without 
-              prior notice or liability, for any reason, including if you breach these Terms. Upon 
-              termination, your right to use the Service will cease immediately.
+            <p className="text-white/70 leading-relaxed text-left max-w-2xl mx-auto">
+              We may update these Terms from time to time. We will notify you of material changes via the app, email, or other reasonable means. Continued use of the Services after changes constitutes acceptance of the revised Terms. If you do not agree, you must stop using the Services and may close your account.
             </p>
           </section>
 
-          {/* Changes to Terms */}
+          {/* 9. Governing Law & Disputes */}
           <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">Changes to Terms</h2>
-            <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              We reserve the right to modify these Terms at any time. We will notify users of any 
-              material changes by posting the new Terms on this page and updating the "Last updated" 
-              date. Your continued use of the Service after such modifications constitutes acceptance 
-              of the updated Terms.
+            <h2 className="text-3xl font-bold text-white mb-4 text-center">9. Governing Law & Disputes</h2>
+            <p className="text-white/70 leading-relaxed text-left max-w-2xl mx-auto">
+              These Terms are governed by the laws of Pakistan. Any disputes arising from these Terms or the Services shall be subject to the exclusive jurisdiction of the courts of Pakistan.
             </p>
           </section>
 
-          {/* Governing Law */}
-          <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">Governing Law</h2>
-            <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              These Terms shall be governed by and construed in accordance with applicable laws, 
-              without regard to its conflict of law provisions. Any disputes arising from these 
-              Terms shall be subject to the exclusive jurisdiction of the competent courts.
-            </p>
-          </section>
-
-          {/* Contact */}
+          {/* 10. Contact Information */}
           <Card className="glass-card border-[#00FFFF]/30 bg-gradient-to-r from-[#00FFFF]/10 to-transparent">
             <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">Questions About Terms</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">10. Contact Information</h2>
               <p className="text-white/70 mb-4">
-                If you have any questions about these Terms of Service, please contact us:
+                For questions about these Terms & Conditions, please contact us at support@sportx360.com or at the contact details provided within the SportX360 app.
               </p>
               <ul className="space-y-2 text-white/70">
-                <li>Email: legal@sportx.com</li>
+                <li>Email: support@sportx360.com</li>
                 <li>Visit our Contact Us page for more information</li>
               </ul>
             </CardContent>
@@ -267,4 +164,3 @@ export default function TermsOfServicePage() {
     </div>
   );
 }
-

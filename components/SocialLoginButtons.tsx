@@ -226,7 +226,7 @@ export function SocialLoginButtons({ onSuccess }: SocialLoginButtonsProps) {
       {process.env.NEXT_PUBLIC_APPLE_CLIENT_ID && (
         <Script
           id="apple-signin"
-          strategy="lazyOnLoad"
+          strategy="lazyOnload"
           src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
           onLoad={() => {
             // @ts-ignore

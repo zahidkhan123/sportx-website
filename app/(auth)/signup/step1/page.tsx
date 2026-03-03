@@ -96,7 +96,7 @@ export default function SignupStep1Page() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-white text-center">
-            Create your SportX Account
+            Create your SportX360 Account
           </CardTitle>
           <CardDescription className="text-white/70 text-center">
             Step 1 of 2: Basic Information

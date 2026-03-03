@@ -638,7 +638,7 @@ export function AuthModal(props: AuthModalProps) {
       {googleClientId && (
         <Script
           id="google-identity"
-          strategy="lazyOnLoad"
+          strategy="lazyOnload"
           src="https://accounts.google.com/gsi/client"
           onLoad={() => {
             // Google Identity Services is now loaded
@@ -675,7 +675,7 @@ export function AuthModal(props: AuthModalProps) {
       {appleClientId && (
         <Script
           id="apple-signin"
-          strategy="lazyOnLoad"
+          strategy="lazyOnload"
           src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
           onLoad={() => {
             // @ts-ignore

@@ -74,6 +74,8 @@ export default function ProfilePage() {
   const user = profileData;
   const listings = listingsData?.data || [];
   const marketplaceAds = marketplaceData?.data || [];
+  const displayedListings = listings.slice(0, 5);
+  const displayedMarketplaceAds = marketplaceAds.slice(0, 5);
   const credits = creditsData || {
     adsCredits: 0,
     featuredCredits: 0,
@@ -138,7 +140,7 @@ export default function ProfilePage() {
     if (user?.fullName) {
       const names = user.fullName.split(" ");
       return names
-        .map((n) => n[0])
+        .map((n: any) => n[0])
         .join("")
         .toUpperCase()
         .slice(0, 2);
@@ -250,12 +252,12 @@ export default function ProfilePage() {
                       <div className="text-sm text-white/70">Marketplace</div>
                     </div>
                     <div className="w-px h-12 bg-white/10" />
-                    <div className="text-center">
+                    {/* <div className="text-center">
                       <div className="text-2xl font-bold text-[#00FFA3]">
                         {credits.freeAdsRemaining + credits.adsCredits}
                       </div>
                       <div className="text-sm text-white/70">Credits</div>
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* Action Buttons */}
@@ -340,39 +342,52 @@ export default function ProfilePage() {
                         </Button>
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        {listings.map((listing: any) => (
-                          <div
-                            key={listing._id}
-                            className="flex items-center gap-3 p-4 bg-white/5 rounded-lg border border-white/10 hover:border-[#00FFA3]/50 transition-colors"
-                          >
-                            <Link
-                              href={`/listings/${listing._id}`}
-                              className="flex-1"
+                      <>
+                        <div className="space-y-4">
+                          {displayedListings.map((listing: any) => (
+                            <div
+                              key={listing._id}
+                              className="flex items-center gap-3 p-4 bg-white/5 rounded-lg border border-white/10 hover:border-[#00FFA3]/50 transition-colors"
                             >
-                              <h3 className="text-lg font-semibold text-white mb-2">
-                                {listing.title}
-                              </h3>
-                              <p className="text-white/70 text-sm">
-                                {listing.sportType} • {listing.listingType}
-                              </p>
-                              <p className="text-[#00FFA3] text-xs mt-2 capitalize">
-                                Status: {listing.status}
-                              </p>
-                            </Link>
+                              <Link
+                                href={`/listings/${listing._id}`}
+                                className="flex-1"
+                              >
+                                <h3 className="text-lg font-semibold text-white mb-2">
+                                  {listing.title}
+                                </h3>
+                                <p className="text-white/70 text-sm">
+                                  {listing.sportType} • {listing.listingType}
+                                </p>
+                                <p className="text-[#00FFA3] text-xs mt-2 capitalize">
+                                  Status: {listing.status}
+                                </p>
+                              </Link>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  router.push(`/create-listing?edit=${listing._id}`)
+                                }
+                                className="text-[#00FFA3] hover:text-[#00FFA3] hover:bg-[#00FFA3]/10"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                        {listings.length > 5 && (
+                          <div className="mt-6 flex justify-center">
                             <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                router.push(`/create-listing?edit=${listing._id}`)
-                              }
-                              className="text-[#00FFA3] hover:text-[#00FFA3] hover:bg-[#00FFA3]/10"
+                              variant="outline"
+                              className="border-white/20 text-white hover:bg-white/10"
+                              onClick={() => router.push("/my-listings")}
                             >
-                              <Edit className="h-4 w-4" />
+                              See all listings
                             </Button>
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
@@ -394,61 +409,74 @@ export default function ProfilePage() {
                         </Button>
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        {marketplaceAds.map((ad: any) => (
-                          <div
-                            key={ad._id}
-                            className="flex items-center gap-3 p-4 bg-white/5 rounded-lg border border-white/10 hover:border-[#00FFA3]/50 transition-colors"
-                          >
-                            <Link
-                              href={`/marketplace/${ad._id}`}
-                              className="flex-1"
+                      <>
+                        <div className="space-y-4">
+                          {displayedMarketplaceAds.map((ad: any) => (
+                            <div
+                              key={ad._id}
+                              className="flex items-center gap-3 p-4 bg-white/5 rounded-lg border border-white/10 hover:border-[#00FFA3]/50 transition-colors"
                             >
-                              <div className="flex items-center gap-2 mb-2">
-                                <h3 className="text-lg font-semibold text-white">
-                                  {ad.title}
-                                </h3>
-                                {ad.isBoosted && (
-                                  <span className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white text-xs rounded-full">
-                                    <Rocket className="h-3 w-3" />
-                                    Boosted
-                                  </span>
+                              <Link
+                                href={`/marketplace/${ad._id}`}
+                                className="flex-1"
+                              >
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h3 className="text-lg font-semibold text-white">
+                                    {ad.title}
+                                  </h3>
+                                  {ad.isBoosted && (
+                                    <span className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white text-xs rounded-full">
+                                      <Rocket className="h-3 w-3" />
+                                      Boosted
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-white/70 text-sm">
+                                  {ad.category} • Rs {ad.price}
+                                </p>
+                                <p className="text-[#00FFA3] text-xs mt-2 capitalize">
+                                  Status: {ad.status}
+                                </p>
+                              </Link>
+                              <div className="flex items-center gap-2">
+                                {!ad.isBoosted && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleBoost(ad._id)}
+                                    disabled={boostMutation.isPending}
+                                    className="text-[#FF6B6B] hover:text-[#FF6B6B] hover:bg-[#FF6B6B]/10"
+                                    title={`Boost (${credits.boostCredits} credits)`}
+                                  >
+                                    <Rocket className="h-4 w-4" />
+                                  </Button>
                                 )}
-                              </div>
-                              <p className="text-white/70 text-sm">
-                                {ad.category} • Rs {ad.price}
-                              </p>
-                              <p className="text-[#00FFA3] text-xs mt-2 capitalize">
-                                Status: {ad.status}
-                              </p>
-                            </Link>
-                            <div className="flex items-center gap-2">
-                              {!ad.isBoosted && (
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => handleBoost(ad._id)}
-                                  disabled={boostMutation.isPending}
-                                  className="text-[#FF6B6B] hover:text-[#FF6B6B] hover:bg-[#FF6B6B]/10"
-                                  title={`Boost (${credits.boostCredits} credits)`}
+                                  onClick={() =>
+                                    router.push(`/add-listing?edit=${ad._id}`)
+                                  }
+                                  className="text-[#00FFA3] hover:text-[#00FFA3] hover:bg-[#00FFA3]/10"
                                 >
-                                  <Rocket className="h-4 w-4" />
+                                  <Edit className="h-4 w-4" />
                                 </Button>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  router.push(`/add-listing?edit=${ad._id}`)
-                                }
-                                className="text-[#00FFA3] hover:text-[#00FFA3] hover:bg-[#00FFA3]/10"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
+                              </div>
                             </div>
+                          ))}
+                        </div>
+                        {marketplaceAds.length > 5 && (
+                          <div className="mt-6 flex justify-center">
+                            <Button
+                              variant="outline"
+                              className="border-white/20 text-white hover:bg-white/10"
+                              onClick={() => router.push("/my-listings")}
+                            >
+                              See all marketplace ads
+                            </Button>
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
@@ -481,7 +509,7 @@ export default function ProfilePage() {
                       My Listings
                     </Button>
                   </Link>
-                  <Link href="/packages">
+                  {/* <Link href="/packages">
                     <Button
                       variant="ghost"
                       className="w-full justify-start text-white hover:bg-white/10"
@@ -498,7 +526,7 @@ export default function ProfilePage() {
                       <Package className="h-4 w-4 mr-2" />
                       Buy Packages
                     </Button>
-                  </Link>
+                  </Link> */}
                   <Link href="/profile/feedback">
                     <Button
                       variant="ghost"
@@ -559,7 +587,7 @@ export default function ProfilePage() {
             </Card>
 
             {/* Credits Card */}
-            <Card className="glass-card border-white/10">
+            {/* <Card className="glass-card border-white/10">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-white mb-4">
                   Your Credits
@@ -596,7 +624,7 @@ export default function ProfilePage() {
                   </Link>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>

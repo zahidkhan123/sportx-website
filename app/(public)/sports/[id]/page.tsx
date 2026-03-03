@@ -19,6 +19,7 @@ import {
   ArrowLeft,
   CheckCircle,
   Clock,
+  Phone,
 } from "lucide-react";
 
 export default function ListingDetailsPage() {
@@ -438,6 +439,38 @@ export default function ListingDetailsPage() {
 
   const user = listing.userId || {};
 
+  const primaryContactNumber =
+    listing.data &&
+    Object.keys(listing.data).reduce<string | null>((found, key) => {
+      if (found) return found;
+      if (!listing.data) return found;
+      const value = (listing.data as any)[key];
+      if (
+        value &&
+        /phone|contactNumber|mobile|tel/i.test(key) &&
+        /[\d+]/.test(String(value))
+      ) {
+        return String(value);
+      }
+      return found;
+    }, null);
+
+  const isOwner =
+    (user._id || listing.userId)?.toString() ===
+    (currentUser?._id || currentUser?.id)?.toString();
+
+  const handleCall = () => {
+    if (!primaryContactNumber) return;
+    window.location.href = `tel:${primaryContactNumber}`;
+  };
+
+  const handleWhatsApp = () => {
+    if (!primaryContactNumber) return;
+    const phoneNumber = primaryContactNumber.replace(/[^0-9]/g, "");
+    if (!phoneNumber) return;
+    window.open(`https://wa.me/${phoneNumber}`, "_blank");
+  };
+
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
@@ -654,9 +687,8 @@ export default function ListingDetailsPage() {
                     View →
                   </Button>
                 </div>
-                {currentUser &&
-                  (user._id || listing.userId)?.toString() !==
-                    (currentUser._id || currentUser.id)?.toString() && (
+                {currentUser && !isOwner && (
+                  <>
                     <Button
                       onClick={async () => {
                         setChatLoading(true);
@@ -681,7 +713,27 @@ export default function ListingDetailsPage() {
                       <MessageCircle className="h-4 w-4 mr-2" />
                       {chatLoading ? "Opening..." : "Chat with owner"}
                     </Button>
-                  )}
+
+                    {primaryContactNumber && (
+                      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Button
+                          onClick={handleCall}
+                          className="w-full bg-white/10 text-white hover:bg-white/20 border border-white/20"
+                        >
+                          <Phone className="h-4 w-4 mr-2" />
+                          Call
+                        </Button>
+                        <Button
+                          onClick={handleWhatsApp}
+                          className="w-full bg-[#25D366] text-white hover:bg-[#25D366]/90"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          WhatsApp
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
               </CardContent>
             </Card>
 

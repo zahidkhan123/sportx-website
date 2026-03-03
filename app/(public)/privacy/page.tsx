@@ -13,173 +13,125 @@ export default function PrivacyPolicyPage() {
               Privacy <span className="text-[#00FFFF]">Policy</span>
             </h1>
             <p className="text-white/70">
-              Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              Last updated: February 2025
             </p>
           </div>
 
           {/* Introduction */}
           <section className="mb-8">
             <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              At SportX, we take your privacy seriously. This Privacy Policy explains how we collect, 
-              use, disclose, and safeguard your information when you use our platform. Please read 
-              this privacy policy carefully. If you do not agree with the terms of this privacy policy, 
-              please do not access the site.
+              SportX360 (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) operates the SportX360 mobile application and related services. This app is intended for users in Pakistan. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our app and services. Please read it carefully.
             </p>
           </section>
 
-          {/* Information We Collect */}
+          {/* 1. Information We Collect */}
           <section className="mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <FileText className="h-6 w-6 text-[#00FFFF]" />
-              <h2 className="text-3xl font-bold text-white">Information We Collect</h2>
+              <h2 className="text-3xl font-bold text-white">1. Information We Collect</h2>
             </div>
             <div className="space-y-4 text-white/70 text-left max-w-2xl mx-auto">
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Personal Information</h3>
-                <p className="mb-2">We collect information that you provide directly to us, including:</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Name, email address, phone number</li>
-                  <li>City, gender, and other profile information</li>
-                  <li>Payment information (processed securely through third-party providers)</li>
-                  <li>Content you post, including listings, messages, and reviews</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Automatically Collected Information</h3>
-                <p className="mb-2">When you use our platform, we automatically collect:</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Device information (IP address, browser type, operating system)</li>
-                  <li>Usage data (pages visited, time spent, clicks)</li>
-                  <li>Cookies and similar tracking technologies</li>
-                </ul>
-              </div>
+              <p>
+                We collect information that you provide directly and information we obtain when you use the SportX360 app, including for listings, marketplace, and communications.
+              </p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>Account and profile information (name, email, phone number, profile photo)</li>
+                <li>Listings data (players, teams, tournaments, grounds, officials, and related details)</li>
+                <li>Marketplace activity (ads, buy/sell gear, categories)</li>
+                <li>Messages, chats, and support communications</li>
+                <li>Device information, logs, and usage data when you use our services</li>
+                <li>Location data when you use location-based features (e.g. grounds near you)</li>
+              </ul>
             </div>
           </section>
 
-          {/* How We Use Your Information */}
+          {/* 2. How We Use Your Information */}
           <section className="mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Eye className="h-6 w-6 text-[#00FFFF]" />
-              <h2 className="text-3xl font-bold text-white">How We Use Your Information</h2>
+              <h2 className="text-3xl font-bold text-white">2. How We Use Your Information</h2>
             </div>
             <div className="space-y-2 text-white/70 text-left max-w-2xl mx-auto">
-              <p>We use the information we collect to:</p>
+              <p>
+                We use the information we collect to provide, maintain, and improve the SportX360 app; to send you updates and support; and to comply with legal obligations. We do not process payments; any payment or transaction between users is conducted at their own risk and is not our responsibility.
+              </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>Provide, maintain, and improve our services</li>
-                <li>Process transactions and send related information</li>
-                <li>Send you technical notices, updates, and support messages</li>
-                <li>Respond to your comments, questions, and requests</li>
-                <li>Monitor and analyze trends, usage, and activities</li>
-                <li>Detect, prevent, and address technical issues and fraudulent activity</li>
-                <li>Personalize your experience and provide content relevant to your interests</li>
+                <li>To facilitate listings and marketplace ads</li>
+                <li>To personalize your experience and show relevant content</li>
+                <li>To communicate with you and send notifications</li>
+                <li>To detect and prevent fraud, abuse, and security issues</li>
+                <li>To analyze usage and improve our services</li>
               </ul>
             </div>
           </section>
 
-          {/* Information Sharing */}
+          {/* 3. Information Sharing */}
           <section className="mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Shield className="h-6 w-6 text-[#00FFFF]" />
-              <h2 className="text-3xl font-bold text-white">Information Sharing and Disclosure</h2>
+              <h2 className="text-3xl font-bold text-white">3. Information Sharing</h2>
             </div>
             <div className="space-y-4 text-white/70 text-left max-w-2xl mx-auto">
-              <p>We do not sell your personal information. We may share your information in the following circumstances:</p>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Public Information</h3>
-                <p>
-                  Information you choose to make public, such as your profile information and listings, 
-                  will be visible to other users of the platform.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Service Providers</h3>
-                <p>
-                  We may share information with third-party service providers who perform services on 
-                  our behalf, such as payment processing, data analysis, and email delivery.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Legal Requirements</h3>
-                <p>
-                  We may disclose your information if required to do so by law or in response to valid 
-                  requests by public authorities.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Data Security */}
-          <section className="mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Lock className="h-6 w-6 text-[#00FFFF]" />
-              <h2 className="text-3xl font-bold text-white">Data Security</h2>
-            </div>
-            <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              We implement appropriate technical and organizational security measures to protect your 
-              personal information against unauthorized access, alteration, disclosure, or destruction. 
-              However, no method of transmission over the Internet or electronic storage is 100% secure, 
-              and we cannot guarantee absolute security.
-            </p>
-          </section>
-
-          {/* Your Rights */}
-          <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">Your Rights</h2>
-            <div className="space-y-2 text-white/70 text-left max-w-2xl mx-auto">
-              <p>You have the right to:</p>
+              <p>
+                We do not sell your personal information. We may share information with service providers who assist our operations, with other users as needed for listings and marketplace (e.g. listing or ad contact), or when required by law.
+              </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>Access and receive a copy of your personal data</li>
-                <li>Rectify inaccurate or incomplete personal data</li>
-                <li>Request deletion of your personal data</li>
-                <li>Object to processing of your personal data</li>
-                <li>Request restriction of processing your personal data</li>
-                <li>Data portability (receive your data in a structured format)</li>
-                <li>Withdraw consent at any time</li>
+                <li>Service providers (hosting, analytics, communications)</li>
+                <li>Other users (e.g. for marketplace or listing contact)</li>
+                <li>Legal and regulatory authorities when required by law</li>
               </ul>
             </div>
           </section>
 
-          {/* Cookies */}
+          {/* 4. Data Security */}
           <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">Cookies and Tracking Technologies</h2>
-            <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              We use cookies and similar tracking technologies to track activity on our platform and 
-              hold certain information. You can instruct your browser to refuse all cookies or to 
-              indicate when a cookie is being sent. However, if you do not accept cookies, you may 
-              not be able to use some portions of our platform.
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Lock className="h-6 w-6 text-[#00FFFF]" />
+              <h2 className="text-3xl font-bold text-white">4. Data Security</h2>
+            </div>
+            <p className="text-white/70 leading-relaxed text-left max-w-2xl mx-auto">
+              We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, alteration, disclosure, or destruction.
+            </p>
+            <ul className="list-disc list-inside space-y-1 ml-4 mt-4 text-white/70 max-w-2xl mx-auto">
+              <li>Encrypted transmission and storage where applicable</li>
+              <li>Access controls and authentication</li>
+              <li>Regular security reviews and updates</li>
+            </ul>
+          </section>
+
+          {/* 5. Your Rights */}
+          <section className="mb-8">
+            <h2 className="text-3xl font-bold text-white mb-4 text-center">5. Your Rights</h2>
+            <div className="space-y-2 text-white/70 text-left max-w-2xl mx-auto">
+              <p>
+                You may have rights to access, correct, delete, or port your data, and to object to or restrict certain processing, in accordance with applicable law in Pakistan. You can update your profile in the app or contact us to exercise these rights.
+              </p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>Access and correction of your data</li>
+                <li>Deletion of your account and associated data</li>
+                <li>Opt-out of marketing communications</li>
+                <li>Data portability where applicable</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* 6. Children's Privacy */}
+          <section className="mb-8">
+            <h2 className="text-3xl font-bold text-white mb-4 text-center">6. Children&apos;s Privacy</h2>
+            <p className="text-white/70 leading-relaxed text-left max-w-2xl mx-auto">
+              Our services are not directed to individuals under the age of 13 (or higher where required by law). We do not knowingly collect personal information from children. If you believe we have collected such information, please contact us so we can delete it.
             </p>
           </section>
 
-          {/* Children's Privacy */}
-          <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">Children's Privacy</h2>
-            <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              Our platform is not intended for children under the age of 13. We do not knowingly 
-              collect personal information from children under 13. If you are a parent or guardian 
-              and believe your child has provided us with personal information, please contact us 
-              immediately.
-            </p>
-          </section>
-
-          {/* Changes to Privacy Policy */}
-          <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">Changes to This Privacy Policy</h2>
-            <p className="text-white/70 leading-relaxed text-center max-w-2xl mx-auto">
-              We may update our Privacy Policy from time to time. We will notify you of any changes 
-              by posting the new Privacy Policy on this page and updating the "Last updated" date. 
-              You are advised to review this Privacy Policy periodically for any changes.
-            </p>
-          </section>
-
-          {/* Contact */}
+          {/* 7. Contact Us */}
           <Card className="glass-card border-[#00FFFF]/30 bg-gradient-to-r from-[#00FFFF]/10 to-transparent">
             <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">Contact Us</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">7. Contact Us</h2>
               <p className="text-white/70 mb-4">
-                If you have any questions about this Privacy Policy, please contact us:
+                For privacy-related questions, requests, or complaints, please contact us at support@sportx360.com or at the contact details provided within the SportX360 app. We will respond in accordance with applicable law in Pakistan.
               </p>
               <ul className="space-y-2 text-white/70">
-                <li>Email: privacy@sportx.com</li>
+                <li>Email: support@sportx360.com</li>
                 <li>Address: Available on our Contact Us page</li>
               </ul>
             </CardContent>
@@ -201,4 +153,3 @@ export default function PrivacyPolicyPage() {
     </div>
   );
 }
-

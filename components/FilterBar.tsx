@@ -49,9 +49,9 @@ export function FilterBar({
           </SelectTrigger>
           <SelectContent className="bg-black border-white/10">
             <SelectItem value="all" className="text-white">All Sports</SelectItem>
-            {SPORTS.map((s) => (
-              <SelectItem key={s} value={s.toLowerCase()} className="text-white">
-                {s}
+            {SPORTS.map((s: { id: string; name: string; emoji: string }) => (
+              <SelectItem key={s.id} value={s.id} className="text-white">
+                {s.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -63,7 +63,7 @@ export function FilterBar({
           </SelectTrigger>
           <SelectContent className="bg-black border-white/10">
             <SelectItem value="all" className="text-white">All Cities</SelectItem>
-            {CITIES.map((c) => (
+            {CITIES.map((c: string) => (
               <SelectItem key={c} value={c} className="text-white">
                 {c}
               </SelectItem>

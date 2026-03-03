@@ -18,11 +18,9 @@ import {
   CheckCircle,
   ArrowLeft,
   Star,
-  ChevronLeft,
-  ChevronRight,
+  Clock,
   Rocket,
 } from "lucide-react";
-import Image from "next/image";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -32,7 +30,6 @@ export default function MarketplaceAdDetailsPage() {
   const adId = params.id as string;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
   const queryClient = useQueryClient();
 
@@ -133,31 +130,6 @@ export default function MarketplaceAdDetailsPage() {
     }
   }, [ad]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowStickyHeader(window.scrollY > 400);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (ad?.images && ad.images.length > 1) {
-        if (e.key === "ArrowLeft" && currentImageIndex > 0) {
-          prevImage();
-        } else if (
-          e.key === "ArrowRight" &&
-          currentImageIndex < ad.images.length - 1
-        ) {
-          nextImage();
-        }
-      }
-    };
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentImageIndex, ad?.images]);
-
   const handleWishlist = async () => {
     try {
       await marketplaceAPI.toggleWishlist(adId);
@@ -178,10 +150,10 @@ export default function MarketplaceAdDetailsPage() {
   };
 
   const handleWhatsApp = () => {
-    if (ad?.contactNumber) {
-      const phoneNumber = ad.contactNumber.replace(/[^0-9]/g, "");
-      window.open(`https://wa.me/${phoneNumber}`, "_blank");
-    }
+    if (!ad?.contactNumber) return;
+    const phoneNumber = ad.contactNumber.replace(/[^0-9]/g, "");
+    if (!phoneNumber) return;
+    window.open(`https://wa.me/${phoneNumber}`, "_blank");
   };
 
   const handleReport = () => {
@@ -191,16 +163,21 @@ export default function MarketplaceAdDetailsPage() {
     }
   };
 
-  const nextImage = () => {
-    if (ad?.images && currentImageIndex < ad.images.length - 1) {
-      setCurrentImageIndex(currentImageIndex + 1);
-    }
-  };
-
-  const prevImage = () => {
-    if (currentImageIndex > 0) {
-      setCurrentImageIndex(currentImageIndex - 1);
-    }
+  const renderDetailRow = (
+    icon: React.ReactNode,
+    label: string,
+    value: string | number
+  ) => {
+    if (!value) return null;
+    return (
+      <div className="flex items-start gap-3 py-3 border-b border-white/10">
+        <div className="text-[#00FFA3] mt-0.5">{icon}</div>
+        <div className="flex-1">
+          <p className="text-sm text-white/70 mb-1">{label}</p>
+          <p className="text-white">{value}</p>
+        </div>
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -222,12 +199,18 @@ export default function MarketplaceAdDetailsPage() {
     );
   }
 
+  const isAdOwner =
+    currentUser &&
+    (currentUser._id === ad.userId?._id ||
+      currentUser._id === ad.sellerId?._id ||
+      currentUser._id === ad.userId ||
+      currentUser._id === ad.sellerId);
+
   return (
     <div className="min-h-screen bg-black">
-      {/* Sticky Header - Airbnb style */}
-      {showStickyHeader && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between max-w-7xl">
+      {/* Header (same style as listings) */}
+      <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-sm border-b border-white/10">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Button
             variant="ghost"
             onClick={() => router.back()}
@@ -236,9 +219,7 @@ export default function MarketplaceAdDetailsPage() {
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back
           </Button>
-            <h1 className="text-lg font-semibold text-white truncate max-w-md">
-              {ad.title}
-            </h1>
+          <h1 className="text-lg font-bold text-white">Ad Details</h1>
           <Button
             variant="ghost"
             onClick={handleWishlist}
@@ -251,369 +232,268 @@ export default function MarketplaceAdDetailsPage() {
             />
           </Button>
         </div>
-        </div>
-      )}
-
-      {/* Floating Header Buttons */}
-      <div className="fixed top-20 left-4 z-40 flex flex-col gap-3">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="w-10 h-10 p-0 bg-white/90 hover:bg-white rounded-full shadow-lg"
-        >
-          <ArrowLeft className="h-5 w-5 text-black" />
-        </Button>
-        <Button
-          variant="ghost"
-          onClick={handleWishlist}
-          className="w-10 h-10 p-0 bg-white/90 hover:bg-white rounded-full shadow-lg"
-        >
-          <Heart
-            className={`h-5 w-5 ${
-              isWishlisted ? "fill-[#FF3B5C] text-[#FF3B5C]" : "text-black"
-            }`}
-          />
-        </Button>
       </div>
 
-      {/* Image Gallery - Airbnb style with Slider */}
-      {ad.images && ad.images.length > 0 && (
-        <div className="relative w-full h-[60vh] bg-black overflow-hidden">
-          {/* Image Slider Container */}
-          <div className="relative w-full h-full overflow-hidden">
-            <div
-              className="flex h-full transition-transform duration-500 ease-in-out"
-              style={{
-                transform: `translateX(-${currentImageIndex * 100}%)`,
-                width: `${ad.images.length * 100}%`,
-              }}
-            >
-              {ad.images.map((image, index) => (
-                <div
-                  key={index}
-                  className="w-full h-full flex-shrink-0"
-                  style={{ width: `${100 / ad.images.length}%` }}
-                >
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Main Layout (aligned with listings detail) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Left Side - Images */}
+          <div className="space-y-4">
+            {ad.images && ad.images.length > 0 ? (
+              <>
+                <div className="relative aspect-square rounded-lg overflow-hidden bg-white/5">
                   <img
-                    src={image}
-                    alt={`${ad.title} - Image ${index + 1}`}
-                    className="w-full h-full object-cover select-none"
-                    draggable={false}
+                    src={ad.images[currentImageIndex]}
+                    alt={ad.title}
+                    className="w-full h-full object-cover"
                   />
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Navigation Arrows - Only show if more than 1 image */}
-          {ad.images.length > 1 && (
-            <>
-              {currentImageIndex > 0 && (
-                <button
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all z-10 hover:scale-110"
-                  aria-label="Previous image"
-                >
-                  <ChevronLeft className="h-6 w-6 text-black" />
-                </button>
-              )}
-              {currentImageIndex < ad.images.length - 1 && (
-                <button
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all z-10 hover:scale-110"
-                  aria-label="Next image"
-                >
-                  <ChevronRight className="h-6 w-6 text-black" />
-                </button>
-              )}
-            </>
-          )}
-
-          {/* Image Indicators - Only show if more than 1 image */}
-          {ad.images.length > 1 && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-              {ad.images.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentImageIndex(index)}
-                  className={`h-2 rounded-full transition-all duration-300 hover:bg-white/80 ${
-                    currentImageIndex === index
-                      ? "w-8 bg-white"
-                      : "w-2 bg-white/50"
-                  }`}
-                  aria-label={`Go to image ${index + 1}`}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Image Counter - Only show if more than 1 image */}
                 {ad.images.length > 1 && (
-            <div className="absolute top-6 right-6 bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full z-10">
-              <span className="text-white text-sm font-medium">
-                {currentImageIndex + 1} / {ad.images.length}
-              </span>
-            </div>
-          )}
-
-          {/* Thumbnail Strip - Optional, show at bottom for quick navigation */}
-          {ad.images.length > 1 && ad.images.length <= 6 && (
-            <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm p-2 z-10">
-              <div className="flex gap-2 justify-center overflow-x-auto scrollbar-hide">
-                {ad.images.map((image, index) => (
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    {ad.images.map((image: string, index: number) => (
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                        className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
                           currentImageIndex === index
-                        ? "border-[#00FFA3] scale-110"
-                        : "border-white/30 hover:border-white/60"
+                            ? "border-[#00FFA3]"
+                            : "border-white/10 hover:border-white/30"
                         }`}
                       >
                         <img
                           src={image}
-                      alt={`Thumbnail ${index + 1}`}
+                          alt={`${ad.title} ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
                       </button>
                     ))}
                   </div>
+                )}
+              </>
+            ) : (
+              <div className="aspect-square rounded-lg bg-white/5 flex items-center justify-center">
+                <p className="text-white/50">No images</p>
               </div>
             )}
           </div>
-      )}
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-12">
-          {/* Left Column - Main Content */}
-          <div className="space-y-8">
-            {/* Title and Price Section */}
+          {/* Right Side - Details (mirroring listings) */}
+          <div className="space-y-6">
+            {/* Title, price, badges */}
             <div>
-              <h1 className="text-4xl font-semibold text-white mb-4">
-                {ad.title}
-              </h1>
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-[#00FFA3]">
+              <h1 className="text-4xl font-bold text-white mb-4">{ad.title}</h1>
+              <div className="flex flex-wrap items-center gap-4 mb-4">
+                <span className="text-3xl font-bold text-[#00FFA3]">
                   Rs {ad.price?.toLocaleString()}
-                  </span>
-                </div>
+                </span>
                 {ad.isFeatured && (
                   <Badge className="bg-gradient-to-r from-[#00FFA3] to-[#00CFFF] text-black border-0 flex items-center gap-1 px-3 py-1">
                     <Star className="h-3 w-3 fill-black" />
                     Featured
                   </Badge>
                 )}
+                {ad.category && (
+                  <Badge className="bg-white/10 text-white border-white/20">
+                    {ad.category}
+                  </Badge>
+                )}
               </div>
 
               {/* Location */}
-              <div className="flex items-center gap-2 mb-6">
-                <MapPin className="h-5 w-5 text-white/60" />
-                <span className="text-white/80">{ad.location}</span>
-              </div>
-
-              {/* Divider */}
-              <div className="h-px bg-white/10 my-8" />
-
-              {/* Seller Section - Airbnb style */}
-              <div className="flex items-center gap-4 pb-8">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#00FFFF] to-[#39FF14] flex items-center justify-center text-black font-bold text-xl">
-                  {ad.sellerId?.fullName?.charAt(0).toUpperCase() || "U"}
+              {ad.location && (
+                <div className="flex items-center gap-2 mb-4">
+                  <MapPin className="h-5 w-5 text-white/60" />
+                  <span className="text-white/80">{ad.location}</span>
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-xl font-semibold text-white">
-                      {ad.sellerId?.fullName || "Unknown Seller"}
-                    </h3>
-                    {ad.sellerId?.isVerified && (
-                      <CheckCircle className="h-5 w-5 text-[#00FFA3]" />
+              )}
+
+              {/* Stats (views, wishlist) */}
+              <div className="grid grid-cols-2 gap-4 py-4 border-y border-white/10 mb-4">
+                <div className="text-center">
+                  <Eye className="h-5 w-5 text-[#00FFA3] mx-auto mb-1" />
+                  <p className="text-white font-bold">{ad.viewsCount || 0}</p>
+                  <p className="text-xs text-white/70">Views</p>
+                </div>
+                <div className="text-center">
+                  <Heart className="h-5 w-5 text-[#00FFA3] mx-auto mb-1" />
+                  <p className="text-white font-bold">
+                    {ad.wishlistCount || 0}
+                  </p>
+                  <p className="text-xs text-white/70">Saved</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            {ad.description && (
+              <Card className="glass-card border-white/10">
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-bold text-white mb-3">
+                    About this item
+                  </h3>
+                  <p className="text-white/80 leading-relaxed whitespace-pre-wrap">
+                    {ad.description}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Posted By + contact actions (same pattern as listings) */}
+            <Card className="glass-card border-white/10">
+              <CardContent className="p-4">
+                <h3 className="text-lg font-bold text-white mb-3">Posted By</h3>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FFFF] to-[#39FF14] flex items-center justify-center text-black font-bold text-lg">
+                    {ad.sellerId?.fullName?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-white font-semibold">
+                        {ad.sellerId?.fullName || "Unknown Seller"}
+                      </p>
+                      {ad.sellerId?.isVerified && (
+                        <CheckCircle className="h-4 w-4 text-[#00FFA3]" />
+                      )}
+                    </div>
+                    {ad.sellerId?.city && (
+                      <p className="text-white/70 text-sm">{ad.sellerId.city}</p>
                     )}
                   </div>
-                  {ad.sellerId?.city && (
-                    <p className="text-white/70">{ad.sellerId.city}</p>
+                </div>
+
+                {/* {!isAdOwner && ( */}
+                  <>
+                    <Button
+                      onClick={async () => {
+                        if (!currentUser) {
+                          router.push(`/login?redirect=/marketplace/${adId}`);
+                          return;
+                        }
+                        try {
+                          setChatLoading(true);
+                          const res = await chatAPI.getOrCreateChat(
+                            "PRODUCT",
+                            adId
+                          );
+                          const chat = res?.data?.chat;
+                          if (chat) router.push(`/chats/${chat._id}`);
+                        } catch (e: any) {
+                          toast.error(
+                            e?.response?.data?.message || "Could not start chat"
+                          );
+                        } finally {
+                          setChatLoading(false);
+                        }
+                      }}
+                      disabled={chatLoading}
+                      className="mt-3 w-full bg-[#00FFA3] text-black hover:bg-[#00FFA3]/90"
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      {chatLoading ? "Opening..." : "Chat with seller"}
+                    </Button>
+
+                    {ad.contactNumber && (
+                      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {/* <Button
+                          onClick={handleCall}
+                          className="w-full bg-white/10 text-white hover:bg-white/20 border border-white/20"
+                        >
+                          <Phone className="h-4 w-4 mr-2" />
+                          Call
+                        </Button> */}
+                        {/* <Button
+                          onClick={handleWhatsApp}
+                          className="w-full bg-[#25D366] text-white hover:bg-[#25D366]/90"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          WhatsApp
+                        </Button> */}
+                      </div>
+                    )}
+                  </>
+                {/* )} */}
+              </CardContent>
+            </Card>
+
+            {/* Owner-only actions: boost status */}
+            {/* {isAdOwner && (
+              <Card className="glass-card border-white/10">
+                <CardContent className="p-4 space-y-3">
+                  {!ad.isBoosted ? (
+                    <Button
+                      onClick={handleBoost}
+                      disabled={
+                        boostMutation.isPending || credits.boostCredits < 1
+                      }
+                      className="w-full bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white hover:from-[#FF6B6B]/90 hover:to-[#FF8E53]/90 h-12 text-sm font-semibold"
+                    >
+                      <Rocket className="h-5 w-5 mr-2" />
+                      {boostMutation.isPending
+                        ? "Boosting..."
+                        : `Boost Ad (${credits.boostCredits} credits)`}
+                    </Button>
+                  ) : (
+                    <div className="w-full bg-gradient-to-r from-[#00FFA3] to-[#00CFFF] text-black p-3 rounded-lg text-center text-sm font-semibold flex items-center justify-center gap-2">
+                      <Rocket className="h-4 w-4" />
+                      <span>Ad is Boosted</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )} */}
+
+            {/* Post Information (basic) */}
+            <Card className="glass-card border-white/10">
+              <CardContent className="p-4">
+                <h3 className="text-lg font-bold text-white mb-3">
+                  Ad Information
+                </h3>
+                <div className="space-y-0">
+                  {renderDetailRow(
+                    <Clock className="h-5 w-5" />,
+                    "Created",
+                    ad.createdAt
+                      ? new Date(ad.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : ""
+                  )}
+                  {renderDetailRow(
+                    <Clock className="h-5 w-5" />,
+                    "Last Updated",
+                    ad.updatedAt
+                      ? new Date(ad.updatedAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : ""
+                  )}
+                  {renderDetailRow(
+                    <CheckCircle className="h-5 w-5" />,
+                    "Status",
+                    ad.status?.toUpperCase?.() || "ACTIVE"
                   )}
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* Divider */}
-              <div className="h-px bg-white/10 my-8" />
-
-              {/* Description Section */}
-              <div>
-                <h2 className="text-2xl font-semibold text-white mb-4">
-                  About this item
-                </h2>
-                <p className="text-white/80 leading-relaxed whitespace-pre-wrap">
-                  {ad.description}
-                </p>
-              </div>
-
-              {/* Category and Condition */}
-              <div className="grid grid-cols-2 gap-4 pt-8">
-                <Card className="glass-card border-white/10">
-                  <CardContent className="p-6">
-                    <p className="text-sm text-white/60 mb-2">Category</p>
-                    <p className="text-lg font-semibold text-white">
-                    {ad.category}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="glass-card border-white/10">
-                  <CardContent className="p-6">
-                    <p className="text-sm text-white/60 mb-2">Condition</p>
-                    <p
-                      className={`text-lg font-semibold ${
-                      ad.condition === "New"
-                          ? "text-[#00FFA3]"
-                          : "text-[#FFC107]"
-                      }`}
-                  >
-                    {ad.condition}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Stats */}
-              <div className="flex items-center gap-8 pt-8 border-t border-white/10">
-                <div className="flex items-center gap-2">
-                  <Eye className="h-5 w-5 text-white/60" />
-                  <span className="text-white/80">
-                    {ad.viewsCount || 0} views
-                  </span>
-                  </div>
-                <div className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-white/60" />
-                  <span className="text-white/80">
-                    {ad.wishlistCount || 0} saved
-                  </span>
-                  </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Sticky Contact Card */}
-          <div className="lg:sticky lg:top-24 h-fit">
-            <Card className="glass-card border-white/10 p-6">
-              <div className="space-y-6">
-                {/* Price Display */}
-                <div>
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-3xl font-bold text-[#00FFA3]">
-                      Rs {ad.price?.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-white/70">
-                    <MapPin className="h-4 w-4" />
-                    <span>{ad.location}</span>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="space-y-3">
-              {isOwner && !ad?.isBoosted && (
-                <Button
-                  onClick={handleBoost}
-                  disabled={boostMutation.isPending || credits.boostCredits < 1}
-                  className="w-full bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white hover:from-[#FF6B6B]/90 hover:to-[#FF8E53]/90 h-14 text-lg font-semibold"
-                >
-                  <Rocket className="h-5 w-5 mr-2" />
-                  {boostMutation.isPending
-                    ? "Boosting..."
-                    : `Boost Ad (${credits.boostCredits} credits)`}
-                </Button>
-              )}
-              {isOwner && ad?.isBoosted && (
-                <div className="w-full bg-gradient-to-r from-[#00FFA3] to-[#00CFFF] text-black p-4 rounded-lg text-center font-semibold">
-                  <Rocket className="h-5 w-5 mx-auto mb-2" />
-                  Ad is Boosted
-                </div>
-              )}
-              {!isOwner && (
-                <>
-                  <Button
-                    onClick={async () => {
-                      setChatLoading(true);
-                      try {
-                        const res = await chatAPI.getOrCreateChat(
-                          "PRODUCT",
-                          adId
-                        );
-                        const chat = res?.data?.chat;
-                        if (chat) router.push(`/chats/${chat._id}`);
-                      } catch (e: any) {
-                        toast.error(
-                          e?.response?.data?.message || "Could not start chat"
-                        );
-                      } finally {
-                        setChatLoading(false);
-                      }
-                    }}
-                    disabled={chatLoading}
-                    className="w-full bg-[#00FFA3] text-black hover:bg-[#00FFA3]/90 h-14 text-lg font-semibold"
-                  >
-                    <MessageCircle className="h-5 w-5 mr-2" />
-                    {chatLoading ? "Opening..." : "Chat with Seller"}
-                  </Button>
-                  <Button
-                    onClick={handleCall}
-                    className="w-full bg-white/10 text-white hover:bg-white/20 h-14 text-lg font-semibold border border-white/20"
-                  >
-                    <Phone className="h-5 w-5 mr-2" />
-                    Call
-                  </Button>
-                  <Button
-                    onClick={handleWhatsApp}
-                    className="w-full bg-[#25D366] text-white hover:bg-[#25D366]/90 h-14 text-lg font-semibold"
-                  >
-                    <MessageCircle className="h-5 w-5 mr-2" />
-                    WhatsApp
-                  </Button>
-                </>
-              )}
-              <Button
-                variant="outline"
-                onClick={handleReport}
-                className="w-full border-red-500/50 text-red-500 hover:bg-red-500/10 h-12"
-              >
-                <Flag className="h-5 w-5 mr-2" />
-                Report Ad
-              </Button>
-            </div>
-
-                {/* Seller Info Card */}
-                {ad.sellerId && (
-                  <div className="pt-6 border-t border-white/10">
-                  <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FFFF] to-[#39FF14] flex items-center justify-center text-black font-bold">
-                      {ad.sellerId?.fullName?.charAt(0).toUpperCase() || "U"}
-                    </div>
-                      <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                          <p className="text-white font-semibold truncate">
-                          {ad.sellerId?.fullName || "Unknown"}
-                        </p>
-                        {ad.sellerId?.isVerified && (
-                            <CheckCircle className="h-4 w-4 text-[#00FFA3] flex-shrink-0" />
-                          )}
-                        </div>
-                        {ad.sellerId?.city && (
-                          <p className="text-white/70 text-sm truncate">
-                            {ad.sellerId.city}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              </Card>
+            {/* Report button */}
+            <Button
+              variant="outline"
+              onClick={handleReport}
+              className="w-full border-red-500/50 text-red-500 hover:bg-red-500/10 h-12"
+            >
+              <Flag className="h-5 w-5 mr-2" />
+              Report Ad
+            </Button>
           </div>
         </div>
 
-        {/* Google Ads */}
-        <div className="mt-12 mb-8">
+        {/* Google Ads at Bottom */}
+        <div className="mb-8">
           <GoogleAds
             adSlot="3814764721"
             adFormat="auto"

@@ -9,6 +9,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GoogleAds from '@/components/GoogleAds';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { supportAPI } from '@/lib/api';
+
+type RequestType = 'general' | 'account_deletion' | 'support' | 'feedback';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -17,6 +27,7 @@ export default function ContactPage() {
     subject: '',
     message: '',
   });
+  const [requestType, setRequestType] = useState<RequestType>('general');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,14 +35,53 @@ export default function ContactPage() {
     setLoading(true);
 
     try {
-      // In a real application, you would send this to your backend API
-      // For now, we'll simulate a successful submission
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      toast.success('Thank you for your message! We\'ll get back to you soon.');
+      let backendType: 'help' | 'feedback' | 'contact' = 'contact';
+      let finalSubject = formData.subject.trim();
+
+      switch (requestType) {
+        case 'account_deletion':
+          backendType = 'help';
+          if (!finalSubject) {
+            finalSubject = 'Account deletion request';
+          }
+          break;
+        case 'support':
+          backendType = 'help';
+          if (!finalSubject) {
+            finalSubject = 'Support request';
+          }
+          break;
+        case 'feedback':
+          backendType = 'feedback';
+          if (!finalSubject) {
+            finalSubject = 'Feedback';
+          }
+          break;
+        default:
+          backendType = 'contact';
+          if (!finalSubject) {
+            finalSubject = 'Contact request';
+          }
+      }
+
+      await supportAPI.submitContact({
+        type: backendType,
+        subject: finalSubject,
+        message: formData.message,
+        userEmail: formData.email,
+        userName: formData.name,
+      });
+
+      toast.success("Thank you for your message! We'll get back to you soon.");
       setFormData({ name: '', email: '', subject: '', message: '' });
-    } catch (error) {
-      toast.error('Failed to send message. Please try again.');
+      setRequestType('general');
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 401) {
+        toast.error('Please sign in to send a message.');
+      } else {
+        toast.error('Failed to send message. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -59,7 +109,7 @@ export default function ContactPage() {
                   <Mail className="h-6 w-6 text-[#00FFFF]" />
                 </div>
                 <h3 className="text-white font-semibold mb-2">Email</h3>
-                <p className="text-white/70 text-sm">support@sportx.com</p>
+                <p className="text-white/70 text-sm">support@sportx360.com</p>
               </CardContent>
             </Card>
 
@@ -69,7 +119,7 @@ export default function ContactPage() {
                   <Phone className="h-6 w-6 text-[#00FFFF]" />
                 </div>
                 <h3 className="text-white font-semibold mb-2">Phone</h3>
-                <p className="text-white/70 text-sm">+1 (555) 123-4567</p>
+                <p className="text-white/70 text-sm">+92 (306) 916-1679</p>
               </CardContent>
             </Card>
 
@@ -117,14 +167,45 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="subject" className="text-white">Subject</Label>
+                  <Label htmlFor="requestType" className="text-white">
+                    Request type
+                  </Label>
+                  <Select
+                    value={requestType}
+                    onValueChange={(value) =>
+                      setRequestType(value as RequestType)
+                    }
+                  >
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                      <SelectValue placeholder="Choose a request type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black border-white/10">
+                      <SelectItem value="general" className="text-white">
+                        General contact / question
+                      </SelectItem>
+                      <SelectItem
+                        value="account_deletion"
+                        className="text-white"
+                      >
+                        Account deletion request
+                      </SelectItem>
+                      <SelectItem value="support" className="text-white">
+                        Help / issue
+                      </SelectItem>
+                      <SelectItem value="feedback" className="text-white">
+                        Feedback
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="subject" className="text-white">Subject (optional)</Label>
                   <Input
                     id="subject"
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
-                    placeholder="What's this about?"
-                    required
+                    placeholder="Brief summary of your request"
                   />
                 </div>
                 <div className="space-y-2">

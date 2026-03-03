@@ -5,19 +5,25 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SPORTS } from '@/lib/constants';
-import { cn } from '@/lib/utils';
-import { InterestsStep } from '@/components/signup/InterestsStep';
-import { BasicInfoStep } from '@/components/signup/BasicInfoStep';
-import { ProfileDetailsStep } from '@/components/signup/ProfileDetailsStep';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { authService } from '@/lib/auth';
+import { toast } from 'sonner';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState<'interests' | 'basic' | 'profile'>('interests');
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   useEffect(() => {
-    // Check if user is already authenticated
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
       if (token) {
@@ -26,24 +32,64 @@ export default function SignupPage() {
     }
   }, [router]);
 
-  const handleInterestsComplete = (interests: string[]) => {
-    setSelectedInterests(interests);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('selectedInterests', JSON.stringify(interests));
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
     }
-    setCurrentStep('basic');
+
+    if (!formData.password || formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    if (!acceptedTerms) {
+      newErrors.acceptedTerms = 'You must accept the terms to continue';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleBasicInfoComplete = () => {
-    setCurrentStep('profile');
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) {
+      toast.error('Please fix the errors in the form');
+      return;
+    }
 
-  const handleBackToInterests = () => {
-    setCurrentStep('interests');
-  };
+    setLoading(true);
+    try {
+      await authService.signup({
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      });
 
-  const handleBackToBasic = () => {
-    setCurrentStep('basic');
+      // Store credentials temporarily for post-OTP login (to ensure token for profile completion)
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(
+          'signupCredentials',
+          JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        );
+      }
+
+      toast.success('Account created! Please verify your email with the OTP code.');
+      router.push(
+        `/verify-otp?email=${encodeURIComponent(formData.email)}&type=register`,
+      );
+    } catch (error: any) {
+      toast.error(error.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,122 +97,135 @@ export default function SignupPage() {
       <Card className="glass-card w-full max-w-md border-white/10">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-white text-center">
-            {currentStep === 'interests' && (
-              <>
-                Join <span className="text-[#00FFFF]">Sport</span>X
-              </>
-            )}
-            {currentStep === 'basic' && (
-              <>
-                Create your <span className="text-[#00FFFF]">Sport</span>X Account
-              </>
-            )}
-            {currentStep === 'profile' && (
-              <>
-                Complete Your <span className="text-[#00FFFF]">Profile</span>
-              </>
-            )}
+            Create your <span className="text-[#00FFFF]">Sport</span>X Account
           </CardTitle>
           <CardDescription className="text-white/70 text-center">
-            {currentStep === 'interests' && 'Select your favorite sports to personalize your experience'}
-            {currentStep === 'basic' && 'Step 1 of 2: Basic Information'}
-            {currentStep === 'profile' && 'Step 2 of 2: Profile Details'}
+            Sign up with email and password. You&apos;ll complete your profile after verifying OTP.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Progress Indicator */}
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="flex items-center gap-2">
-              <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center",
-                currentStep === 'interests' 
-                  ? "bg-[#00FFFF]" 
-                  : "bg-[#00FFA3]"
-              )}>
-                {currentStep !== 'interests' ? (
-                  <span className="text-black text-sm font-bold">✓</span>
-                ) : (
-                  <span className="text-black text-sm font-bold">1</span>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-white">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={formData.email}
+                onChange={(e) => {
+                  setFormData({ ...formData, email: e.target.value });
+                  if (errors.email) setErrors({ ...errors, email: '' });
+                }}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/50"
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-white">
+                Password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={(e) => {
+                    setFormData({ ...formData, password: e.target.value });
+                    if (errors.password)
+                      setErrors({ ...errors, password: '' });
+                  }}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/50 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-xs"
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-sm text-red-500">{errors.password}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-white">
+                Confirm Password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={(e) => {
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    });
+                    if (errors.confirmPassword)
+                      setErrors({ ...errors, confirmPassword: '' });
+                  }}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/50 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-xs"
+                >
+                  {showConfirmPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-500">
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-start gap-2 text-sm">
+              <button
+                type="button"
+                onClick={() => {
+                  setAcceptedTerms(!acceptedTerms);
+                  if (errors.acceptedTerms)
+                    setErrors({ ...errors, acceptedTerms: '' });
+                }}
+                className="mt-1 h-4 w-4 rounded border border-[#00FFFF] flex items-center justify-center bg-white"
+              >
+                {acceptedTerms && (
+                  <span className="text-[10px] font-bold text-black">✓</span>
                 )}
-              </div>
-              <span className={cn(
-                "text-sm font-semibold",
-                currentStep === 'interests' ? "text-[#00FFFF]" : "text-[#00FFA3]"
-              )}>
-                Interests
-              </span>
+              </button>
+              <p className="text-white/80">
+                I agree to the{' '}
+                <Link
+                  href="/terms"
+                  className="text-[#00FFFF] hover:underline"
+                >
+                  Terms &amp; Conditions
+                </Link>
+                .
+              </p>
             </div>
-            <div className="flex-1 h-0.5 bg-white/10"></div>
-            <div className="flex items-center gap-2">
-              <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center",
-                currentStep === 'basic'
-                  ? "bg-[#00FFFF]"
-                  : currentStep === 'profile'
-                  ? "bg-[#00FFA3]"
-                  : "bg-white/10"
-              )}>
-                {currentStep === 'profile' ? (
-                  <span className="text-black text-sm font-bold">✓</span>
-                ) : (
-                  <span className={cn(
-                    "text-sm font-bold",
-                    currentStep === 'basic' ? "text-black" : "text-white"
-                  )}>2</span>
-                )}
-              </div>
-              <span className={cn(
-                "text-sm font-semibold",
-                currentStep === 'basic' 
-                  ? "text-[#00FFFF]" 
-                  : currentStep === 'profile'
-                  ? "text-[#00FFA3]"
-                  : "text-white/50"
-              )}>
-                Sign Up
-              </span>
-            </div>
-            <div className="flex-1 h-0.5 bg-white/10"></div>
-            <div className="flex items-center gap-2">
-              <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center",
-                currentStep === 'profile'
-                  ? "bg-[#00FFFF]"
-                  : "bg-white/10"
-              )}>
-                <span className={cn(
-                  "text-sm font-bold",
-                  currentStep === 'profile' ? "text-black" : "text-white"
-                )}>3</span>
-              </div>
-              <span className={cn(
-                "text-sm font-semibold",
-                currentStep === 'profile' ? "text-[#00FFFF]" : "text-white/50"
-              )}>
-                Profile
-              </span>
-            </div>
-          </div>
+            {errors.acceptedTerms && (
+              <p className="text-sm text-red-500">{errors.acceptedTerms}</p>
+            )}
 
-          {/* Step Content */}
-          {currentStep === 'interests' && (
-            <InterestsStep onComplete={handleInterestsComplete} />
-          )}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#00FFFF] text-black hover:bg-[#00FFFF]/90"
+            >
+              {loading ? 'Signing up...' : 'Sign Up'}
+            </Button>
+          </form>
 
-          {currentStep === 'basic' && (
-            <BasicInfoStep 
-              onComplete={handleBasicInfoComplete}
-              onBack={handleBackToInterests}
-            />
-          )}
-
-          {currentStep === 'profile' && (
-            <ProfileDetailsStep 
-              onBack={handleBackToBasic}
-            />
-          )}
-
-          {/* Login Link */}
           <div className="mt-6 text-center text-sm text-white/70">
             Already have an account?{' '}
             <Link href="/login" className="text-[#00FFFF] hover:underline">

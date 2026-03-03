@@ -83,7 +83,7 @@ export function Navbar() {
             {/* City Selector - Desktop */}
 
             <Link href="/home" className="text-xl font-bold text-white">
-              <span className="text-[#00FFFF]">Sport</span>X
+              <span className="text-[#00FFFF]">Sport</span>X<span className="text-[#39FF14]">360</span>
             </Link>
           </div>
 
