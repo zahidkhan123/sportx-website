@@ -10,7 +10,7 @@ export default function AboutPage() {
           {/* Hero Section */}
           <div className="mb-12 text-center">
             <h1 className="text-5xl font-bold text-white mb-4">
-              About <span className="text-[#00FFFF]">Sport</span>X
+              About <span className="text-[#00FFFF]">SportX360</span>
             </h1>
             <p className="text-xl text-white/70">
               Your ultimate sports marketplace connecting athletes, teams, and sports enthusiasts
@@ -22,14 +22,14 @@ export default function AboutPage() {
             <section>
               <h2 className="text-3xl font-bold text-white mb-4 text-center">Who We Are</h2>
               <p className="mb-4 text-left max-w-2xl mx-auto">
-                SportX is a comprehensive sports marketplace platform designed to bring together athletes, 
+                SportX360 is a comprehensive sports marketplace platform designed to bring together athletes, 
                 teams, coaches, and sports enthusiasts in one vibrant community. Whether you're looking 
                 to buy or sell sports equipment, join a team, organize a tournament, or find coaching 
-                opportunities, SportX makes it easy to discover and connect with sports opportunities 
+                opportunities, SportX360 makes it easy to discover and connect with sports opportunities 
                 around you.
             </p>
             <p className="text-left max-w-2xl mx-auto">
-                Founded with a passion for sports and community building, SportX aims to break down 
+                Founded with a passion for sports and community building, SportX360 aims to break down 
                 barriers and make sports more accessible to everyone. We believe that sports have the 
                 power to unite people, build character, and create lasting friendships.
               </p>
@@ -157,17 +157,17 @@ export default function AboutPage() {
             <section className="pt-8">
               <Card className="glass-card border-[#00FFFF]/30 bg-gradient-to-r from-[#00FFFF]/10 to-transparent">
                 <CardContent className="p-8 text-center">
-                  <h2 className="text-3xl font-bold text-white mb-4">Join the SportX Community</h2>
+                  <h2 className="text-3xl font-bold text-white mb-4">Join the SportX360 Community</h2>
                   <p className="text-white/70 mb-6 text-lg">
                     Whether you're a professional athlete, weekend warrior, or just getting started, 
-                    SportX is here to help you on your sports journey.
+                    SportX360 is here to help you on your sports journey.
                   </p>
                   <div className="flex gap-4 justify-center">
                     <a
-                      href="/signup"
+                      href="/home"
                       className="px-6 py-3 bg-[#00FFFF] text-black font-semibold rounded-lg hover:bg-[#00FFFF]/90 transition-colors"
                     >
-                      Get Started
+                      Explore Marketplace
                     </a>
                     <a
                       href="/contact"

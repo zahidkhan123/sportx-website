@@ -1,15 +1,15 @@
 'use client';
 
-import { Search, Inbox } from 'lucide-react';
+import { Search, Inbox, Store } from 'lucide-react';
 
 interface EmptyStateProps {
   title: string;
   description: string;
-  icon?: 'search' | 'inbox';
+  icon?: 'search' | 'inbox' | 'store';
 }
 
 export function EmptyState({ title, description, icon = 'inbox' }: EmptyStateProps) {
-  const Icon = icon === 'search' ? Search : Inbox;
+  const Icon = icon === 'search' ? Search : icon === 'inbox' ? Inbox : icon === 'store' ? Store : Store;
 
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">

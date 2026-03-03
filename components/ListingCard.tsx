@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { MessageCircle, Phone } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MessageCircle, Phone, Star, Rocket } from "lucide-react";
 import Image from "next/image";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 
@@ -22,6 +23,8 @@ interface ListingCardProps {
   createdAt?: string;
   listingData?: Record<string, unknown>; // For generating descriptive subtitles
   location?: Record<string, unknown>; // For location data
+  isFeatured?: boolean;
+  isBoosted?: boolean;
 }
 
 export function ListingCard({
@@ -35,6 +38,8 @@ export function ListingCard({
   createdAt,
   listingData,
   location,
+  isFeatured = false,
+  isBoosted = false,
 }: ListingCardProps) {
   const formatSport = (sportType?: string) => {
     if (!sportType) return "";
@@ -131,6 +136,8 @@ export function ListingCard({
     const userName = userId?.name || userId?.fullName || "Someone";
     const loc = getLocationString();
     const data = listingData;
+    // Get intent: AVAILABLE or LOOKING_FOR (defaults to AVAILABLE for backward compatibility)
+    const intent = (data.intent as string) || "AVAILABLE";
 
     switch (listingType) {
       case "player": {
@@ -164,14 +171,7 @@ export function ListingCard({
           positionStr = `All-rounder (${bowlingStyle})`;
         }
 
-        const lookingForTeam =
-          data.lookingForTeam !== undefined
-            ? data.lookingForTeam
-            : data.available !== undefined
-            ? !data.available
-            : true;
-
-        if (lookingForTeam) {
+        if (intent === "LOOKING_FOR") {
           return `${playerName} is looking for a Team to join as a ${positionStr}${
             loc ? ` in ${loc}` : ""
           }`;
@@ -272,19 +272,57 @@ export function ListingCard({
         const groundName = (data.groundName ||
           data.name ||
           "a ground") as string;
-        const lookingForBooking =
-          data.lookingForBooking !== undefined ? data.lookingForBooking : true;
-        const bookingDate = data.bookingDate
-          ? formatDateForDisplay(data.bookingDate as string)
-          : "";
-
-        if (lookingForBooking) {
+        
+        if (intent === "LOOKING_FOR") {
+          // Player looking for ground
+          const bookingDate = data.bookingDateAndTime || data.bookingDate
+            ? formatDateForDisplay((data.bookingDateAndTime || data.bookingDate) as string)
+            : "";
           return `${userName} is looking for ${groundName} to play${
             loc ? ` in ${loc}` : ""
           }${bookingDate ? ` on ${bookingDate}` : ""}`;
         }
-
-        return `${groundName} is available${loc ? ` in ${loc}` : ""}`;
+        
+        // Ground owner posting availability
+        {
+          const parts: string[] = [];
+          parts.push(`${groundName} is available for booking`);
+          
+          if (loc) {
+            parts.push(`in ${loc}`);
+          }
+          
+          // Add pricing information
+          const pricingParts: string[] = [];
+          if (data.hourlyRate) {
+            pricingParts.push(`PKR ${data.hourlyRate}/hour`);
+          }
+          if (data.dailyRate) {
+            pricingParts.push(`PKR ${data.dailyRate}/day`);
+          }
+          if (pricingParts.length > 0) {
+            parts.push(`(${pricingParts.join(", ")})`);
+          }
+          
+          // Add capacity
+          if (data.capacity) {
+            parts.push(`Capacity: ${data.capacity} players`);
+          }
+          
+          // Add availability details
+          const availabilityParts: string[] = [];
+          if (data.availableDays) {
+            availabilityParts.push(data.availableDays as string);
+          }
+          if (data.availableTimings) {
+            availabilityParts.push(data.availableTimings as string);
+          }
+          if (availabilityParts.length > 0) {
+            parts.push(`Available: ${availabilityParts.join(", ")}`);
+          }
+          
+          return parts.join(" · ");
+        }
       }
       case "coach": {
         const coachName = (data.coachName || data.name || userName) as string;
@@ -302,6 +340,11 @@ export function ListingCard({
           ? coachingType.join(", ")
           : coachingType;
 
+        if (intent === "LOOKING_FOR") {
+          return `${userName} is looking for a Coach${
+            loc ? ` in ${loc}` : ""
+          }${coachingTypeStr !== "Coaching" ? ` for ${coachingTypeStr}` : ""}`;
+        }
         return `${coachName} is offering ${coachingTypeStr}${
           loc ? ` in ${loc}` : ""
         }${experience}${availableDays ? ` (${availableDays})` : ""}`;
@@ -374,14 +417,34 @@ export function ListingCard({
 
   return (
     <Link href={href}>
-      <Card className="glass-card border-white/10 hover:border-[#00FFFF]/50 transition-all cursor-pointer group w-full">
+      <Card className="glass-card border-white/10 hover:border-[#00FFFF]/50 transition-all cursor-pointer group w-full relative">
+        {/* Featured Badge */}
+        {isFeatured && (
+          <div className="absolute top-3 left-3 z-10">
+            <Badge className="bg-gradient-to-r from-[#00FFA3] to-[#00CFFF] text-black border-0 px-2.5 py-1 text-xs font-bold flex items-center gap-1 shadow-lg">
+              <Star className="h-3 w-3 fill-black" />
+              Featured
+            </Badge>
+          </div>
+        )}
+
+        {/* Boost Badge - Show even if featured, positioned below featured badge */}
+        {isBoosted && (
+          <div className={`absolute ${isFeatured ? 'top-12 left-3' : 'top-3 left-3'} z-10`}>
+            <Badge className="bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white border-0 px-2.5 py-1 text-xs font-bold flex items-center gap-1 shadow-lg">
+              <Rocket className="h-3 w-3 fill-white" />
+              Boosted
+            </Badge>
+          </div>
+        )}
+
         <CardContent className="p-6">
           {/* Profile Row */}
           <div className="flex items-center gap-4 mb-3">
             <div className="relative w-12 h-12 flex-shrink-0">
               <Image
-                src={profilePicUrl}
-                // alt={name}
+                src={profilePicUrl as string}
+                alt={name as string}
                 width={48}
                 height={48}
                 className="rounded-full object-cover"

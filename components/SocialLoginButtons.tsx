@@ -226,7 +226,7 @@ export function SocialLoginButtons({ onSuccess }: SocialLoginButtonsProps) {
       {process.env.NEXT_PUBLIC_APPLE_CLIENT_ID && (
         <Script
           id="apple-signin"
-          strategy="lazyOnLoad"
+          strategy="lazyOnload"
           src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
           onLoad={() => {
             // @ts-ignore
@@ -250,7 +250,7 @@ export function SocialLoginButtons({ onSuccess }: SocialLoginButtonsProps) {
           <span className="w-full border-t border-white/10" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-black px-2 text-white/70">Or continue with</span>
+          <span className="bg-black px-2 text-white/70">Or</span>
         </div>
       </div>
 

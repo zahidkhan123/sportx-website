@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { listingsAPI } from "@/lib/api";
+import { listingsAPI, chatAPI } from "@/lib/api";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +19,7 @@ import {
   ArrowLeft,
   CheckCircle,
   Clock,
+  Phone,
 } from "lucide-react";
 
 export default function ListingDetailsPage() {
@@ -25,6 +27,15 @@ export default function ListingDetailsPage() {
   const router = useRouter();
   const listingId = params.id as string;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [chatLoading, setChatLoading] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const userStr = localStorage.getItem("user");
+      if (userStr) setCurrentUser(JSON.parse(userStr));
+    }
+  }, []);
 
   const { data, isLoading } = useQuery({
     queryKey: ["listing", listingId],
@@ -234,6 +245,69 @@ export default function ListingDetailsPage() {
         const groundName = (data.groundName ||
           data.name ||
           "a ground") as string;
+        
+        // Detect if this is a ground owner post (has pricing/capacity fields)
+        // vs player looking for ground (has bookingDateAndTime)
+        const isGroundOwnerPost = 
+          data.hourlyRate !== undefined || 
+          data.dailyRate !== undefined || 
+          data.capacity !== undefined ||
+          (data.availableDays !== undefined && !data.bookingDateAndTime);
+        
+        const isPlayerLookingForGround = data.bookingDateAndTime !== undefined;
+        
+        // If player is looking for ground
+        if (isPlayerLookingForGround && !isGroundOwnerPost) {
+          const bookingDate = data.bookingDateAndTime
+            ? formatDateForDisplay(data.bookingDateAndTime as string)
+            : "";
+          return `${userName} is looking for ${groundName} to play${
+            loc ? ` in ${loc}` : ""
+          }${bookingDate ? ` on ${bookingDate}` : ""}`;
+        }
+        
+        // If ground owner is posting availability
+        if (isGroundOwnerPost) {
+          const parts: string[] = [];
+          parts.push(`${groundName} is available for booking`);
+          
+          if (loc) {
+            parts.push(`in ${loc}`);
+          }
+          
+          // Add pricing information
+          const pricingParts: string[] = [];
+          if (data.hourlyRate) {
+            pricingParts.push(`PKR ${data.hourlyRate}/hour`);
+          }
+          if (data.dailyRate) {
+            pricingParts.push(`PKR ${data.dailyRate}/day`);
+          }
+          if (pricingParts.length > 0) {
+            parts.push(`(${pricingParts.join(", ")})`);
+          }
+          
+          // Add capacity
+          if (data.capacity) {
+            parts.push(`Capacity: ${data.capacity} players`);
+          }
+          
+          // Add availability details
+          const availabilityParts: string[] = [];
+          if (data.availableDays) {
+            availabilityParts.push(data.availableDays as string);
+          }
+          if (data.availableTimings) {
+            availabilityParts.push(data.availableTimings as string);
+          }
+          if (availabilityParts.length > 0) {
+            parts.push(`Available: ${availabilityParts.join(", ")}`);
+          }
+          
+          return parts.join(" · ");
+        }
+        
+        // Fallback: check lookingForBooking flag (for backward compatibility)
         const lookingForBooking =
           data.lookingForBooking !== undefined ? data.lookingForBooking : true;
         const bookingDate = data.bookingDate
@@ -364,6 +438,38 @@ export default function ListingDetailsPage() {
   }
 
   const user = listing.userId || {};
+
+  const primaryContactNumber =
+    listing.data &&
+    Object.keys(listing.data).reduce<string | null>((found, key) => {
+      if (found) return found;
+      if (!listing.data) return found;
+      const value = (listing.data as any)[key];
+      if (
+        value &&
+        /phone|contactNumber|mobile|tel/i.test(key) &&
+        /[\d+]/.test(String(value))
+      ) {
+        return String(value);
+      }
+      return found;
+    }, null);
+
+  const isOwner =
+    (user._id || listing.userId)?.toString() ===
+    (currentUser?._id || currentUser?.id)?.toString();
+
+  const handleCall = () => {
+    if (!primaryContactNumber) return;
+    window.location.href = `tel:${primaryContactNumber}`;
+  };
+
+  const handleWhatsApp = () => {
+    if (!primaryContactNumber) return;
+    const phoneNumber = primaryContactNumber.replace(/[^0-9]/g, "");
+    if (!phoneNumber) return;
+    window.open(`https://wa.me/${phoneNumber}`, "_blank");
+  };
 
   return (
     <div className="min-h-screen bg-black">
@@ -581,6 +687,53 @@ export default function ListingDetailsPage() {
                     View →
                   </Button>
                 </div>
+                {currentUser && !isOwner && (
+                  <>
+                    <Button
+                      onClick={async () => {
+                        setChatLoading(true);
+                        try {
+                          const res = await chatAPI.getOrCreateChat(
+                            "LISTING",
+                            listingId
+                          );
+                          const chat = res?.data?.chat;
+                          if (chat) router.push(`/chats/${chat._id}`);
+                        } catch (e: any) {
+                          toast.error(
+                            e?.response?.data?.message || "Could not start chat"
+                          );
+                        } finally {
+                          setChatLoading(false);
+                        }
+                      }}
+                      disabled={chatLoading}
+                      className="mt-3 w-full bg-[#00FFA3] text-black hover:bg-[#00FFA3]/90"
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      {chatLoading ? "Opening..." : "Chat with owner"}
+                    </Button>
+
+                    {primaryContactNumber && (
+                      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Button
+                          onClick={handleCall}
+                          className="w-full bg-white/10 text-white hover:bg-white/20 border border-white/20"
+                        >
+                          <Phone className="h-4 w-4 mr-2" />
+                          Call
+                        </Button>
+                        <Button
+                          onClick={handleWhatsApp}
+                          className="w-full bg-[#25D366] text-white hover:bg-[#25D366]/90"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          WhatsApp
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
               </CardContent>
             </Card>
 

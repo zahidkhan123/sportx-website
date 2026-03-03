@@ -21,7 +21,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Search, Filter, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authService } from "@/lib/auth";
-import { AuthModal } from "@/components/AuthModal";
+import { useLocation } from "@/contexts/LocationContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SPORTS_OPTIONS = [
   { value: "all", label: "All Sports" },
@@ -60,50 +61,70 @@ const CITIES_OPTIONS = [
 
 export default function SportsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [sport, setSport] = useState("all");
-  const [city, setCity] = useState("all");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const { selectedLocation } = useLocation();
 
   useEffect(() => {
     setIsAuthenticated(authService.isAuthenticated());
   }, []);
 
+  // Listen for location changes and invalidate queries
+  useEffect(() => {
+    const handleLocationChange = () => {
+      // Invalidate queries to refetch with new location
+      queryClient.invalidateQueries({ queryKey: ["listings"] });
+    };
+    window.addEventListener('locationChanged', handleLocationChange);
+    return () => window.removeEventListener('locationChanged', handleLocationChange);
+  }, [queryClient]);
+
+  // Get city filter value (empty string for "all", city name for specific cities)
+  const cityFilter = selectedLocation.value === 'all' 
+    ? '' 
+    : selectedLocation.city || '';
+
   const handleCreateListing = () => {
     if (isAuthenticated) {
       router.push("/create-listing");
     } else {
-      setAuthModalOpen(true);
+      router.push("/signup");
     }
   };
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["listings", page, sport, city],
+  // Check if filters are applied
+  const hasFilters = Boolean(sport !== "all" || cityFilter || search);
+
+  // Fetch grouped listings by sport type (only when no filters)
+  const { data: groupedData, isLoading: isLoadingGrouped } = useQuery({
+    queryKey: ["listings-grouped", cityFilter],
+    queryFn: () => listingsAPI.getGroupedBySportsType(6, cityFilter || undefined),
+    enabled: !hasFilters,
+  });
+
+  // If filters are applied, fetch filtered results
+  const { data, isLoading: isLoadingFiltered } = useQuery({
+    queryKey: ["listings", page, sport, cityFilter],
     queryFn: () =>
       listingsAPI.getAll({
         page,
         limit: 12,
         sport: sport === "all" ? "" : sport,
-        city: city === "all" ? "" : city,
+        city: cityFilter,
       }),
+    enabled: hasFilters,
   });
 
-  const listings = data?.data || [];
-  const pagination = data?.pagination || { page: 1, pages: 1, total: 0 };
+  const isLoading = hasFilters ? isLoadingFiltered : isLoadingGrouped;
+  const listings = hasFilters ? (data?.data || []) : [];
+  const pagination = hasFilters ? (data?.pagination || { page: 1, pages: 1, total: 0 }) : { page: 1, pages: 1, total: 0 };
+  const groupedListings = !hasFilters ? (groupedData?.data || []) : [];
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <AuthModal
-        open={authModalOpen}
-        onOpenChange={setAuthModalOpen}
-        defaultTab="signup"
-        onSuccess={() => {
-          setIsAuthenticated(true);
-          router.push("/create-listing");
-        }}
-      />
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold text-white mb-2">Sports Listings</h1>
@@ -150,13 +171,12 @@ export default function SportsPage() {
                 <Filter className="h-5 w-5 text-[#00FFA3]" />
                 <h3 className="text-lg font-semibold text-white">Filters</h3>
               </div>
-              {(sport !== "all" || city !== "all") && (
+              {sport !== "all" && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
                     setSport("all");
-                    setCity("all");
                   }}
                   className="text-white/70 hover:text-white h-8"
                 >
@@ -166,7 +186,7 @@ export default function SportsPage() {
               )}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-1">
               {/* Sport Filter */}
               <div className="space-y-2">
                 <Label className="text-white text-sm font-medium">
@@ -190,57 +210,22 @@ export default function SportsPage() {
                 </Select>
               </div>
 
-              {/* City Filter */}
-              <div className="space-y-2">
-                <Label className="text-white text-sm font-medium">City</Label>
-                <Select value={city} onValueChange={setCity}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white h-11">
-                    <SelectValue placeholder="All Cities" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-black border-white/10">
-                    {CITIES_OPTIONS.map((cityOption) => (
-                      <SelectItem
-                        key={cityOption.value}
-                        value={cityOption.value}
-                        className="text-white"
-                      >
-                        {cityOption.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
 
               {/* Active Filters Display */}
-              {(sport !== "all" || city !== "all") && (
+              {sport !== "all" && (
                 <div className="flex items-end">
                   <div className="flex flex-wrap gap-2 w-full">
-                    {sport !== "all" && (
-                      <div className="flex items-center gap-1 px-3 py-1.5 bg-[#00FFA3]/20 text-[#00FFA3] rounded-lg text-sm font-medium">
-                        <span>
-                          {SPORTS_OPTIONS.find((s) => s.value === sport)?.label}
-                        </span>
-                        <button
-                          onClick={() => setSport("all")}
-                          className="ml-1 hover:text-[#00FFA3]"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    )}
-                    {city !== "all" && (
-                      <div className="flex items-center gap-1 px-3 py-1.5 bg-[#00FFA3]/20 text-[#00FFA3] rounded-lg text-sm font-medium">
-                        <span>
-                          {CITIES_OPTIONS.find((c) => c.value === city)?.label}
-                        </span>
-                        <button
-                          onClick={() => setCity("all")}
-                          className="ml-1 hover:text-[#00FFA3]"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-1 px-3 py-1.5 bg-[#00FFA3]/20 text-[#00FFA3] rounded-lg text-sm font-medium">
+                      <span>
+                        {SPORTS_OPTIONS.find((s) => s.value === sport)?.label}
+                      </span>
+                      <button
+                        onClick={() => setSport("all")}
+                        className="ml-1 hover:text-[#00FFA3]"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -262,49 +247,114 @@ export default function SportsPage() {
 
       {isLoading ? (
         <div className="text-center py-12 text-white/70">Loading...</div>
-      ) : listings.length === 0 ? (
-        <EmptyState
-          title="No listings found"
-          description="Try adjusting your filters or check back later for new listings."
-          icon="search"
-        />
-      ) : (
-        <>
-          {/* Cards Grid */}
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-            {listings.map((listing: Record<string, unknown>) => (
-              <ListingCard
-                key={String(listing._id)}
-                title={(listing.title as string) || "Untitled Listing"}
-                sport={listing.sportType as string}
-                listingType={listing.listingType as string}
-                city={listing.city as string}
-                href={`/sports/${listing._id}`}
-                description={listing.description as string}
-                userId={
-                  listing.userId as {
-                    profileImage?: string;
-                    name?: string;
-                    fullName?: string;
+      ) : hasFilters ? (
+        // Show filtered results
+        listings.length === 0 ? (
+          <EmptyState
+            title="No listings found"
+            description="Try adjusting your filters or check back later for new listings."
+            icon="search"
+          />
+        ) : (
+          <>
+            {/* Cards Grid */}
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+              {listings.map((listing: Record<string, unknown>) => (
+                <ListingCard
+                  key={String(listing._id)}
+                  title={(listing.title as string) || "Untitled Listing"}
+                  sport={listing.sportType as string}
+                  listingType={listing.listingType as string}
+                  city={listing.city as string}
+                  href={`/sports/${listing._id}`}
+                  description={listing.description as string}
+                  userId={
+                    listing.userId as {
+                      profileImage?: string;
+                      name?: string;
+                      fullName?: string;
+                    }
                   }
-                }
-                createdAt={listing.createdAt as string}
-                listingData={listing.data as Record<string, unknown>}
-                location={listing.location as Record<string, unknown>}
-              />
+                  createdAt={listing.createdAt as string}
+                  listingData={listing.data as Record<string, unknown>}
+                  location={listing.location as Record<string, unknown>}
+                  isFeatured={listing.isFeatured as boolean}
+                  isBoosted={listing.isBoosted as boolean}
+                />
+              ))}
+            </div>
+
+            {pagination.pages > 1 && (
+              <div className="mt-8">
+                <Pagination
+                  currentPage={pagination.page}
+                  totalPages={pagination.pages}
+                  onPageChange={setPage}
+                />
+              </div>
+            )}
+          </>
+        )
+      ) : (
+        // Show grouped listings by sport type
+        groupedListings.length === 0 ? (
+          <EmptyState
+            title="No listings found"
+            description="Check back later for new listings."
+            icon="search"
+          />
+        ) : (
+          <div className="space-y-12">
+            {groupedListings.map((group: any) => (
+              <div key={group.sportType}>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-white capitalize">
+                    {group.sportType.replace("_", " ")} Listings
+                  </h2>
+                  <span className="text-white/60 text-sm">
+                    {group.totalCount} {group.totalCount === 1 ? "listing" : "listings"}
+                  </span>
+                </div>
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                  {group.listings.map((listing: Record<string, unknown>) => (
+                    <ListingCard
+                      key={String(listing._id)}
+                      title={(listing.title as string) || "Untitled Listing"}
+                      sport={listing.sportType as string}
+                      listingType={listing.listingType as string}
+                      city={(listing.location as any)?.city as string}
+                      href={`/sports/${listing._id}`}
+                      description={listing.description as string}
+                      userId={
+                        listing.userId as {
+                          profileImage?: string;
+                          name?: string;
+                          fullName?: string;
+                        }
+                      }
+                      createdAt={listing.createdAt as string}
+                      listingData={listing.data as Record<string, unknown>}
+                      location={listing.location as Record<string, unknown>}
+                      isFeatured={listing.isFeatured as boolean}
+                      isBoosted={listing.isBoosted as boolean}
+                    />
+                  ))}
+                </div>
+                {group.totalCount > group.listings.length && (
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setSport(group.sportType)}
+                      className="border-[#00FFA3] text-[#00FFA3] hover:bg-[#00FFA3]/10"
+                    >
+                      View All {group.sportType.replace("_", " ")} Listings ({group.totalCount})
+                    </Button>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
-
-          {pagination.pages > 1 && (
-            <div className="mt-8">
-              <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.pages}
-                onPageChange={setPage}
-              />
-            </div>
-          )}
-        </>
+        )
       )}
     </div>
   );

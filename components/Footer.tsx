@@ -10,7 +10,7 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           <div>
             <h3 className="text-lg font-bold text-white mb-4">
-              <span className="text-[#00FFFF]">Sport</span>X
+              <span className="text-[#00FFFF]">SportX360</span>
             </h3>
             <p className="text-sm text-white/70">
               Your ultimate sports marketplace. Connect, buy, sell, and discover sports opportunities.
@@ -44,6 +44,27 @@ export function Footer() {
           </div>
 
           <div>
+            <h4 className="text-sm font-semibold text-white mb-4">Account</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/profile" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  Profile
+                </Link>
+              </li>
+              {/* <li>
+                <Link href="/my-credits" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  My Credits
+                </Link>
+              </li> */}
+              <li>
+                <Link href="/my-listings" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  My Listings
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
             <h4 className="text-sm font-semibold text-white mb-4">Support</h4>
             <ul className="space-y-2">
               <li>
@@ -63,7 +84,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/terms" className="text-sm text-white/70 hover:text-[#00FFFF]">
-                  Terms of Service
+                  Terms & Conditions
                 </Link>
               </li>
             </ul>
@@ -89,7 +110,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 border-t border-white/10 pt-8 text-center text-sm text-white/70">
-          <p>&copy; {new Date().getFullYear()} SportX. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} SportX360. All rights reserved.</p>
         </div>
       </div>
     </footer>

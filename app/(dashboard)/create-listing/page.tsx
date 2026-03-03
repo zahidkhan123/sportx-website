@@ -17,9 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Star, Rocket, FileText } from "lucide-react";
 import Link from "next/link";
 import GoogleAds from "@/components/GoogleAds";
+import { packagesAPI } from "@/lib/api";
 
 const SPORTS = [
   { value: "cricket", label: "Cricket" },
@@ -63,6 +64,30 @@ export default function CreateListingPage() {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [schema, setSchema] = useState<any>(null);
   const [loadingSchema, setLoadingSchema] = useState(false);
+  const [isBoosted, setIsBoosted] = useState(false);
+  const [isFeatured, setIsFeatured] = useState(false);
+
+  // Fetch user credits
+  const { data: creditsData } = useQuery({
+    queryKey: ["user-credits"],
+    queryFn: async () => {
+      const response = await packagesAPI.getUserCredits();
+      const user = response.data?.user || response.data;
+      return {
+        boostCredits: user?.boostCredits || 0,
+        featuredCredits: user?.featuredCredits || 0,
+        adsCredits: user?.adsCredits || 0,
+        freeAdsRemaining: user?.freeAdsRemaining || 0,
+      };
+    },
+  });
+
+  const credits = creditsData || {
+    boostCredits: 0,
+    featuredCredits: 0,
+    adsCredits: 0,
+    freeAdsRemaining: 0,
+  };
 
   // Load form schema when sport and listing type are selected
   useEffect(() => {
@@ -146,12 +171,12 @@ export default function CreateListingPage() {
 
     // Validate required fields
     const validationErrors: string[] = [];
-    
+
     // Always validate description
     if (!formData.description || formData.description.trim() === "") {
       validationErrors.push("Description is required");
     }
-    
+
     schema.fields.forEach((field: any) => {
       if (field.required && field.name !== "description") {
         const value = formData[field.name];
@@ -169,6 +194,33 @@ export default function CreateListingPage() {
 
     if (validationErrors.length > 0) {
       toast.error(validationErrors.join(", "));
+      return;
+    }
+
+    // Check credits for boost/featured
+    if (isBoosted && credits.boostCredits < 1) {
+      toast.error(
+        "You don't have boost credits. Buy a package to get boost credits.",
+        {
+          action: {
+            label: "Buy Package",
+            onClick: () => router.push("/packages"),
+          },
+        }
+      );
+      return;
+    }
+
+    if (isFeatured && credits.featuredCredits < 1) {
+      toast.error(
+        "You don't have featured credits. Buy a package to get featured credits.",
+        {
+          action: {
+            label: "Buy Package",
+            onClick: () => router.push("/packages"),
+          },
+        }
+      );
       return;
     }
 
@@ -230,6 +282,8 @@ export default function CreateListingPage() {
       data: cleanedData,
       ...(Object.keys(contact).length > 0 ? { contact } : {}),
       location: Object.keys(location).length > 0 ? location : undefined,
+      isBoosted: isBoosted,
+      isFeatured: isFeatured,
     };
 
     createMutation.mutate(listingData);
@@ -455,10 +509,16 @@ export default function CreateListingPage() {
                       <div className="grid gap-6 md:grid-cols-2">
                         {/* Sport Type Selection */}
                         <div className="space-y-2">
-                          <Label htmlFor="sportType" className="text-white text-sm font-medium">
+                          <Label
+                            htmlFor="sportType"
+                            className="text-white text-sm font-medium"
+                          >
                             Sport Type <span className="text-red-500">*</span>
                           </Label>
-                          <Select value={sportType} onValueChange={setSportType}>
+                          <Select
+                            value={sportType}
+                            onValueChange={setSportType}
+                          >
                             <SelectTrigger className="bg-white/5 border-white/10 text-white h-11">
                               <SelectValue placeholder="Select sport type" />
                             </SelectTrigger>
@@ -478,7 +538,10 @@ export default function CreateListingPage() {
 
                         {/* Listing Type Selection */}
                         <div className="space-y-2">
-                          <Label htmlFor="listingType" className="text-white text-sm font-medium">
+                          <Label
+                            htmlFor="listingType"
+                            className="text-white text-sm font-medium"
+                          >
                             Listing Type <span className="text-red-500">*</span>
                           </Label>
                           <Select
@@ -507,20 +570,26 @@ export default function CreateListingPage() {
 
                     {/* Description Field - Always Show */}
                     <div className="space-y-2">
-                      <Label htmlFor="description" className="text-white text-sm font-medium">
+                      <Label
+                        htmlFor="description"
+                        className="text-white text-sm font-medium"
+                      >
                         Description <span className="text-red-500">*</span>
                       </Label>
                       <Textarea
                         id="description"
                         value={formData.description || ""}
-                        onChange={(e) => handleFieldChange("description", e.target.value)}
+                        onChange={(e) =>
+                          handleFieldChange("description", e.target.value)
+                        }
                         required
                         placeholder="Provide a detailed description of your listing..."
                         rows={5}
                         className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none"
                       />
                       <p className="text-xs text-white/60">
-                        This description will be displayed on your listing card and detail page
+                        This description will be displayed on your listing card
+                        and detail page
                       </p>
                     </div>
                   </div>
@@ -529,7 +598,9 @@ export default function CreateListingPage() {
                   {loadingSchema && (
                     <div className="flex items-center justify-center py-12 border-y border-white/10">
                       <Loader2 className="h-8 w-8 animate-spin text-[#00FFA3]" />
-                      <span className="ml-3 text-white">Loading form fields...</span>
+                      <span className="ml-3 text-white">
+                        Loading form fields...
+                      </span>
                     </div>
                   )}
 
@@ -560,8 +631,140 @@ export default function CreateListingPage() {
                     </div>
                   )}
 
-                  {/* Submit Button */}
+                  {/* Credits Display */}
                   <div className="pt-6 border-t border-white/10">
+                    <div className="mb-6 p-4 bg-white/5 rounded-lg border border-white/10">
+                      <h3 className="text-white font-semibold mb-4">
+                        Your Credits
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <div className="flex items-center gap-2 text-white/70 mb-1">
+                            <FileText className="h-4 w-4" />
+                            <span>Ad Credits</span>
+                          </div>
+                          <div className="text-[#00FFA3] font-semibold">
+                            {credits.adsCredits}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 text-white/70 mb-1">
+                            <Star className="h-4 w-4" />
+                            <span>Featured</span>
+                          </div>
+                          <div
+                            className={`font-semibold ${
+                              credits.featuredCredits > 0
+                                ? "text-[#00FFA3]"
+                                : "text-orange-400"
+                            }`}
+                          >
+                            {credits.featuredCredits}
+                            {credits.featuredCredits === 0 && " (Buy package)"}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 text-white/70 mb-1">
+                            <Rocket className="h-4 w-4" />
+                            <span>Boost</span>
+                          </div>
+                          <div className="text-[#00FFA3] font-semibold">
+                            {credits.boostCredits}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 text-white/70 mb-1">
+                            <FileText className="h-4 w-4" />
+                            <span>Free Ads</span>
+                          </div>
+                          <div className="text-[#00FFA3] font-semibold">
+                            {credits.freeAdsRemaining}
+                          </div>
+                        </div>
+                      </div>
+                      {credits.freeAdsRemaining === 0 &&
+                        credits.adsCredits === 0 && (
+                          <div className="mt-3 pt-3 border-t border-white/10">
+                            <Link
+                              href="/packages"
+                              className="text-[#00FFA3] hover:text-[#00FFFF] text-sm font-medium"
+                            >
+                              Buy a package to get more credits →
+                            </Link>
+                          </div>
+                        )}
+                    </div>
+
+                    {/* Boost Option */}
+                    <div className="flex items-start gap-3 p-4 bg-white/5 rounded-lg border border-white/10 mb-4">
+                      <input
+                        type="checkbox"
+                        id="isBoosted"
+                        checked={isBoosted}
+                        onChange={(e) => setIsBoosted(e.target.checked)}
+                        disabled={credits.boostCredits === 0}
+                        className="w-5 h-5 rounded accent-[#00FFA3] mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                      <div className="flex-1">
+                        <Label
+                          htmlFor="isBoosted"
+                          className="text-white cursor-pointer"
+                        >
+                          Boost this listing (premium)
+                        </Label>
+                        <p className="text-white/60 text-sm mt-1">
+                          Your listing will appear at the top for 24 hours
+                        </p>
+                        {credits.boostCredits === 0 && (
+                          <p className="text-orange-400 text-sm mt-1">
+                            Boost Credits: {credits.boostCredits} (Buy package
+                            to get boost credits)
+                          </p>
+                        )}
+                        {credits.boostCredits > 0 && (
+                          <p className="text-[#00FFA3] text-sm mt-1">
+                            Boost Credits: {credits.boostCredits} available
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Featured Option */}
+                    <div className="flex items-start gap-3 p-4 bg-white/5 rounded-lg border border-white/10 mb-6">
+                      <input
+                        type="checkbox"
+                        id="isFeatured"
+                        checked={isFeatured}
+                        onChange={(e) => setIsFeatured(e.target.checked)}
+                        disabled={credits.featuredCredits === 0}
+                        className="w-5 h-5 rounded accent-[#00FFA3] mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                      <div className="flex-1">
+                        <Label
+                          htmlFor="isFeatured"
+                          className="text-white cursor-pointer"
+                        >
+                          Make this a featured listing (premium)
+                        </Label>
+                        <p className="text-white/60 text-sm mt-1">
+                          Your listing will appear at the top of listings
+                        </p>
+                        {credits.featuredCredits === 0 && (
+                          <p className="text-orange-400 text-sm mt-1">
+                            Featured Credits: {credits.featuredCredits} (Buy
+                            package to get featured credits)
+                          </p>
+                        )}
+                        {credits.featuredCredits > 0 && (
+                          <p className="text-[#00FFA3] text-sm mt-1">
+                            Featured Credits: {credits.featuredCredits}{" "}
+                            available
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Submit Button */}
                     <Button
                       type="submit"
                       disabled={

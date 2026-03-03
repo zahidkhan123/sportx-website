@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "./providers";
+import { ContextMenuBlocker } from "@/components/ContextMenuBlocker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SportX - Your Sports Marketplace",
+  title: "SportX360 - Your Sports Marketplace",
   description: "Find sports equipment, connect with teams, and discover sports opportunities",
 };
 
@@ -41,10 +42,12 @@ export default function RootLayout({
             strategy="afterInteractive"
           />
         )}
-        <Providers>
-          {children}
-          <Toaster />
-        </Providers>
+        <ContextMenuBlocker>
+          <Providers>
+            {children}
+            <Toaster />
+          </Providers>
+        </ContextMenuBlocker>
       </body>
     </html>
   );

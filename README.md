@@ -1,6 +1,6 @@
-# SportX Website
+# SportX360 Website
 
-Public website and authenticated dashboard for SportX platform.
+Public website and authenticated dashboard for SportX360 platform.
 
 ## Features
 
@@ -8,7 +8,7 @@ Public website and authenticated dashboard for SportX platform.
 - **Home**: Hero section, featured listings, latest sports listings
 - **Marketplace**: Browse and filter marketplace items
 - **Sports Listings**: Browse teams, tournaments, players, etc.
-- **About**: Information about SportX
+- **About**: Information about SportX360
 - **Contact**: Contact form
 
 ### Authenticated Pages (Coming Soon)

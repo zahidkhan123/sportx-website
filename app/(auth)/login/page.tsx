@@ -17,14 +17,36 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const getNextRouteAfterLogin = (user: any | null | undefined) => {
+    if (!user) return '/home';
+
+    // If profile is already completed, go home
+    if (user.isProfileCompleted) {
+      return '/home';
+    }
+
+    const hasBasic =
+      !!user.fullName && Array.isArray(user.favoriteSports) && user.favoriteSports.length > 0;
+    const hasDetails = !!user.gender && !!user.dob && !!user.phone;
+    const hasLocation = !!user.country && !!user.state && !!user.city;
+
+    if (!hasBasic) return '/complete-profile/step1';
+    if (!hasDetails) return '/complete-profile/step2';
+    if (!hasLocation) return '/complete-profile/step3';
+
+    return '/home';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await authService.login(email, password);
+      const data = await authService.login(email, password);
+      const user = (data as any)?.user;
+      const next = getNextRouteAfterLogin(user);
       toast.success('Login successful!');
-      router.push('/home');
+      router.push(next);
     } catch (error: any) {
       toast.error(error.message || 'Login failed');
     } finally {
@@ -81,11 +103,11 @@ export default function LoginPage() {
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
 
-            <SocialLoginButtons
+            {/* <SocialLoginButtons
               onSuccess={() => {
                 router.push('/home');
               }}
-            />
+            /> */}
           </form>
           <div className="mt-4 text-center text-sm text-white/70">
             Don't have an account?{' '}

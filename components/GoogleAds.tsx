@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, } from 'react';
 
 declare global {
   interface Window {
@@ -234,17 +234,17 @@ export default function GoogleAds({
       style={{ minHeight }}
     >
       <ins
-        ref={adRef}
+        ref={adRef as React.RefObject<HTMLModElement | null>}
         className="adsbygoogle"
         style={{
           display: 'block',
-          minHeight: minHeight,
+          minHeight: minHeight as string,
         }}
-        data-ad-client={adsenseClientId}
-        data-ad-slot={adSlot}
-        data-ad-format={adFormat}
-        {...(adLayout && { 'data-ad-layout': adLayout })}
-        {...(adLayoutKey && { 'data-ad-layout-key': adLayoutKey })}
+        data-ad-client={adsenseClientId as string}
+        data-ad-slot={adSlot as string}
+        data-ad-format={adFormat as string}
+        {...(adLayout && { 'data-ad-layout': adLayout as string })}
+        {...(adLayoutKey && { 'data-ad-layout-key': adLayoutKey as string })}
         {...(fullWidthResponsive && { 'data-full-width-responsive': 'true' })}
       />
       {mounted && debugInfo && (

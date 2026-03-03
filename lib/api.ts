@@ -1,6 +1,22 @@
 import axios from "axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const getBaseURL = () => {
+  // 1. Allow explicit override via env (highest priority)
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+
+  // 2. Use different defaults for development vs production (similar to mobile getBaseURL)
+  if (process.env.NODE_ENV !== "production") {
+    // Development / preview – point to your ngrok/dev API
+    return "https://equatorially-satirical-ferdinand.ngrok-free.dev";
+  }
+
+  // 3. Production default – deployed API URL
+  return "https://sportxapi.playlio.co";
+};
+
+const API_BASE_URL = getBaseURL();
 
 // Create axios instance
 const api = axios.create({
@@ -41,14 +57,56 @@ api.interceptors.response.use(
   }
 );
 
+// Location API
+export const locationAPI = {
+  getCountries: async () => {
+    const response = await api.get("/api/location/countries");
+    return response.data;
+  },
+  getStatesByCountry: async (countryCode: string) => {
+    const response = await api.get(
+      `/api/location/countries/${countryCode}/states`
+    );
+    return response.data;
+  },
+  getCitiesByState: async (countryCode: string, stateCode: string) => {
+    const response = await api.get(
+      `/api/location/countries/${countryCode}/states/${stateCode}/cities`
+    );
+    return response.data;
+  },
+  getCitiesByCountry: async (countryCode: string) => {
+    const response = await api.get(
+      `/api/location/countries/${countryCode}/cities`
+    );
+    return response.data;
+  },
+};
+
 // Auth API
 export const authAPI = {
-  register: async (data: {
-    name: string;
+  // Simple email/password signup (mobile-style)
+  signup: async (data: {
     email: string;
     password: string;
-    city?: string;
-    gender?: string;
+    confirmPassword: string;
+  }) => {
+    const response = await api.post("/api/auth/register", data);
+    return response.data;
+  },
+  register: async (data: {
+    fullName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    phoneNumber?: string;
+    phone?: string;
+    country: string;
+    state: string;
+    city: string;
+    role: string[]; // Backend expects array
+    gender: string;
+    favoriteSports: string[];
   }) => {
     const response = await api.post("/api/auth/register", data);
     return response.data;
@@ -75,6 +133,23 @@ export const authAPI = {
   },
   resendOTP: async (email: string) => {
     const response = await api.post("/api/auth/resend-otp", { email });
+    return response.data;
+  },
+  completeProfile: async (profile: {
+    fullName: string;
+    username: string;
+    gender: string;
+    dob: string;
+    country: string;
+    city: string;
+    state: string;
+    area?: string;
+    phone: string;
+    whatsapp?: string;
+    favoriteSports: string[];
+    profileImage?: string;
+  }) => {
+    const response = await api.put("/api/auth/profile", profile);
     return response.data;
   },
   getProfile: async () => {
@@ -119,6 +194,12 @@ export const listingsAPI = {
     city?: string;
   }) => {
     const response = await api.get("/api/listings", { params });
+    return response.data;
+  },
+  getGroupedBySportsType: async (limit: number = 6, city?: string) => {
+    const params: any = { limit };
+    if (city) params.city = city;
+    const response = await api.get("/api/listings/grouped-by-sports", { params });
     return response.data;
   },
   getById: async (id: string) => {
@@ -223,8 +304,9 @@ export const marketplaceAPI = {
     const response = await api.get("/api/marketplace/user/my-ads", { params });
     return response.data;
   },
-  getFeatured: async () => {
-    const response = await api.get("/api/marketplace/featured");
+  getFeatured: async (location?: string) => {
+    const params = location ? { location } : {};
+    const response = await api.get("/api/marketplace/featured", { params });
     return response.data;
   },
   getCategories: async () => {
@@ -243,11 +325,21 @@ export const marketplaceAPI = {
     const response = await api.post(`/api/marketplace/${id}/report`);
     return response.data;
   },
-  getGroupedBySportsType: async (limit?: number) => {
-    const params = limit ? { limit: limit.toString() } : {};
+  getGroupedBySportsType: async (limit?: number, location?: string) => {
+    const params: Record<string, string> = {};
+    if (limit) params.limit = limit.toString();
+    if (location) params.location = location;
     const response = await api.get("/api/marketplace/grouped-by-sports", {
       params,
     });
+    return response.data;
+  },
+  boostAd: async (id: string) => {
+    const response = await api.post(`/api/marketplace/${id}/boost`);
+    return response.data;
+  },
+  featureAd: async (id: string) => {
+    const response = await api.post(`/api/marketplace/${id}/feature`);
     return response.data;
   },
 };
@@ -374,6 +466,128 @@ export const uploadAPI = {
         url: presignedData.data.url,
       },
     };
+  },
+};
+
+// Chat API
+export const chatAPI = {
+  getOrCreateChat: async (contextType: "LISTING" | "PRODUCT", contextId: string) => {
+    const response = await api.post(`/api/chats/${contextType}/${contextId}`);
+    return response.data;
+  },
+  getChats: async (params?: { status?: string; contextType?: string }) => {
+    const response = await api.get("/api/chats", { params });
+    return response.data;
+  },
+  getChatById: async (chatId: string) => {
+    const response = await api.get(`/api/chats/${chatId}`);
+    return response.data;
+  },
+  closeChat: async (chatId: string) => {
+    const response = await api.patch(`/api/chats/${chatId}/close`);
+    return response.data;
+  },
+  getMessages: async (
+    chatId: string,
+    params?: { limit?: number; before?: string }
+  ) => {
+    const response = await api.get(`/api/chats/${chatId}/messages`, { params });
+    return response.data;
+  },
+  sendMessage: async (
+    chatId: string,
+    content: string,
+    messageType: "text" | "file" | "system" = "text"
+  ) => {
+    const response = await api.post(`/api/chats/${chatId}/messages`, {
+      content,
+      messageType,
+    });
+    return response.data;
+  },
+  reportChat: async (
+    chatId: string,
+    reason: string,
+    description?: string
+  ) => {
+    const response = await api.post(`/api/chats/${chatId}/report`, {
+      reason,
+      description,
+    });
+    return response.data;
+  },
+  reportMessage: async (
+    messageId: string,
+    reason: string,
+    description?: string
+  ) => {
+    const response = await api.post(
+      `/api/chats/messages/${messageId}/report`,
+      { reason, description }
+    );
+    return response.data;
+  },
+};
+
+// Packages API
+export const packagesAPI = {
+  getAll: async () => {
+    const response = await api.get("/api/packages");
+    return response.data;
+  },
+  purchase: async (packageId: string, paymentProof?: string) => {
+    const response = await api.post("/api/packages/purchase", {
+      packageId,
+      paymentProof,
+    });
+    return response.data;
+  },
+  getUserPurchases: async () => {
+    const response = await api.get("/api/packages/my-purchases");
+    return response.data;
+  },
+  getUserCredits: async () => {
+    const response = await api.get("/api/auth/profile");
+    return response.data;
+  },
+  useBoost: async (adId: string) => {
+    const response = await api.post(`/api/listings/use-boost/${adId}`);
+    return response.data;
+  },
+  useFeature: async (adId: string) => {
+    const response = await api.post(`/api/listings/use-feature/${adId}`);
+    return response.data;
+  },
+};
+
+// Feedback API (rating form from app/website)
+export const feedbackAPI = {
+  submit: async (data: {
+    rating: number;
+    tags?: string[];
+    message?: string;
+    featureRequest?: string;
+    allowContact: boolean;
+    platform: string;
+    appVersion?: string;
+  }) => {
+    const response = await api.post("/api/feedback", data);
+    return response.data;
+  },
+};
+
+// Support / Help & Feedback API (contact form)
+export const supportAPI = {
+  submitContact: async (data: {
+    type: "help" | "feedback" | "contact";
+    subject: string;
+    message: string;
+    userId?: string;
+    userEmail?: string;
+    userName?: string;
+  }) => {
+    const response = await api.post("/api/support/contact", data);
+    return response.data;
   },
 };
 
