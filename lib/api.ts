@@ -9,7 +9,7 @@ const getBaseURL = () => {
   // 2. Use different defaults for development vs production (similar to mobile getBaseURL)
   if (process.env.NODE_ENV !== "production") {
     // Development / preview – point to your ngrok/dev API
-    return "https://equatorially-satirical-ferdinand.ngrok-free.dev";
+    return "http://localhost:3000";
   }
 
   // 3. Production default – deployed API URL
