@@ -1,6 +1,22 @@
 import axios from "axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const getBaseURL = () => {
+  // 1. Allow explicit override via env (highest priority)
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+
+  // 2. Use different defaults for development vs production (similar to mobile getBaseURL)
+  if (process.env.NODE_ENV !== "production") {
+    // Development / preview – point to your ngrok/dev API
+    return "https://equatorially-satirical-ferdinand.ngrok-free.dev";
+  }
+
+  // 3. Production default – deployed API URL
+  return "https://sportxapi.playlio.co";
+};
+
+const API_BASE_URL = getBaseURL();
 
 // Create axios instance
 const api = axios.create({
