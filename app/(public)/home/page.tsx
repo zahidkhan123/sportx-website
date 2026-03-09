@@ -560,61 +560,92 @@ export default function HomePage() {
         <section className="relative overflow-hidden border-b border-white/10">
           <div className="absolute inset-0 bg-gradient-to-br from-[#00FFFF]/10 via-transparent to-[#39FF14]/10" />
           <div className="container relative mx-auto max-w-6xl px-6 py-16 md:py-24 lg:py-28">
-            <div className="max-w-2xl">
-              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
-                Your Ultimate{" "}
-                <span className="bg-gradient-to-r from-[#00FFA3] to-[#00FFFF] bg-clip-text text-transparent">
-                  Sports
-                </span>{" "}
-                Marketplace
-              </h1>
-              <p className="mt-4 text-lg text-white/75 sm:text-xl">
-                Connect with teams, buy and sell sports equipment, and discover
-                amazing opportunities — all in one place.
-              </p>
-              {/* Search bar - prominent in hero */}
-              <div className="mt-8 flex max-w-xl items-center gap-3 rounded-xl border border-white/15 bg-black/40 px-4 py-3 shadow-lg backdrop-blur-sm">
-                <Search className="h-5 w-5 shrink-0 text-white/60" />
-                <input
-                  type="search"
-                  placeholder="Search teams, players, grounds, gear…"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      window.location.href = `/sports?search=${encodeURIComponent(searchQuery)}`;
-                    }
-                  }}
-                  className="flex-1 bg-transparent text-base text-white placeholder:text-white/50 outline-none"
-                />
-                <Link href={`/sports?search=${encodeURIComponent(searchQuery)}`}>
-                  <Button
-                    size="default"
-                    className="bg-[#00FFA3] text-[#0D0D0D] hover:bg-[#00FFA3]/90"
-                  >
-                    Search
-                  </Button>
-                </Link>
+            <div className="flex flex-col gap-10 md:flex-row md:items-center md:justify-between">
+              <div className="max-w-2xl w-full">
+                <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
+                  Your Ultimate{" "}
+                  <span className="bg-gradient-to-r from-[#00FFA3] to-[#00FFFF] bg-clip-text text-transparent">
+                    Sports
+                  </span>{" "}
+                  Marketplace
+                </h1>
+                <p className="mt-4 text-lg text-white/75 sm:text-xl">
+                  Connect with teams, buy and sell sports equipment, and discover
+                  amazing opportunities — all in one place.
+                </p>
+                {/* Search bar - prominent in hero */}
+                <div className="mt-8 flex max-w-xl items-center gap-3 rounded-xl border border-white/15 bg-black/40 px-4 py-3 shadow-lg backdrop-blur-sm">
+                  <Search className="h-5 w-5 shrink-0 text-white/60" />
+                  <input
+                    type="search"
+                    placeholder="Search teams, players, grounds, gear…"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        window.location.href = `/sports?search=${encodeURIComponent(searchQuery)}`;
+                      }
+                    }}
+                    className="flex-1 bg-transparent text-base text-white placeholder:text-white/50 outline-none"
+                  />
+                  <Link href={`/sports?search=${encodeURIComponent(searchQuery)}`}>
+                    <Button
+                      size="default"
+                      className="bg-[#00FFA3] text-[#0D0D0D] hover:bg-[#00FFA3]/90"
+                    >
+                      Search
+                    </Button>
+                  </Link>
+                </div>
+                <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="flex w-full flex-col gap-4 sm:flex-row sm:w-auto sm:gap-4">
+                    <Link href="/sports" className="w-full sm:w-auto">
+                      <Button
+                        size="lg"
+                        className="w-full sm:w-auto bg-[#00FFA3] text-[#0D0D0D] hover:bg-[#00FFA3]/90 flex items-center justify-center"
+                      >
+                        Browse Listings
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </Link>
+                    <Link href="/marketplace" className="w-full sm:w-auto">
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full sm:w-auto border-white/20 text-white hover:bg-white/10 flex items-center justify-center"
+                      >
+                        Explore Marketplace
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
               </div>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Link href="/sports">
-                  <Button
-                    size="lg"
-                    className="bg-[#00FFA3] text-[#0D0D0D] hover:bg-[#00FFA3]/90"
+              {/* Store badges on the right side of hero banner */}
+              <div className="flex w-full md:w-auto md:justify-end justify-start items-center">
+                <div className="flex flex-col md:flex-row gap-4 items-center md:items-center">
+                  <Link
+                    href="https://play.google.com/store/apps/details?id=com.sportx360"
+                    target="_blank"
+                    className="flex"
                   >
-                    Browse Listings
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link href="/marketplace">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white/20 text-white hover:bg-white/10"
+                    <img
+                      src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+                      alt="Get it on Google Play"
+                      className="h-18 md:h-18 w-auto"
+                    />
+                  </Link>
+                  <Link
+                    href="https://apps.apple.com/us/app/sportx360/id6759158349"
+                    target="_blank"
+                    className="flex"
                   >
-                    Explore Marketplace
-                  </Button>
-                </Link>
+                    <img
+                      src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83"
+                      alt="Download on the App Store"
+                      className="h-10 md:h-12 w-auto"
+                    />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -932,6 +963,54 @@ export default function HomePage() {
                   </div>
                 </section>
               )}
+
+              {/* Download app section */}
+              <section className="mb-14">
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-10 text-center shadow-xl md:px-10 md:py-12">
+                  <h2 className="text-2xl font-bold text-white md:text-3xl">
+                    Download the SportX360 app
+                  </h2>
+                  <p className="mx-auto mt-4 max-w-xl text-lg text-white/70">
+                    Get the full SportX360 experience on your phone — post listings, chat, and manage everything on the go.
+                  </p>
+                  <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+                    <Link
+                      href="https://play.google.com/store/apps/details?id=com.sportx360"
+                      target="_blank"
+                    >
+                      {/* <Button
+                        size="lg"
+                        variant="ghost"
+                        className="border-white/20 text-white hover:bg-white/10 px-7 py-5 min-h-[64px] min-w-[240px]"
+                      > */}
+                        <img
+                          src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+                          alt="Get it on Google Play"
+                          className="mr-3 h-20 w-auto" // Increased icon size
+                        />
+                        {/* Get it on Google Play */}
+                      {/* </Button> */}
+                    </Link>
+                    <Link
+                      href="https://apps.apple.com/us/app/sportx360/id6759158349"
+                      target="_blank"
+                    >
+                      {/* <Button
+                        size="lg"
+                        variant="ghost"
+                        className="border-white/20 text-white hover:bg-white/10 px-7 py-5 min-h-[64px] min-w-[240px]"
+                      > */}
+                        <img
+                          src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83"
+                          // alt="Download on the App Store"
+                          className="mr-3 h-14 w-auto" // Increased icon size
+                        />
+                        {/* Download on the App Store */}
+                      {/* /</Button> */}
+                    </Link>
+                  </div>
+                </div>
+              </section>
 
               {/* Conversion / CTA card */}
               <section className="pb-12 md:pb-16">

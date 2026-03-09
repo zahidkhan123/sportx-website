@@ -115,18 +115,37 @@ export default function PrivacyPolicyPage() {
             </div>
           </section>
 
-          {/* 6. Children's Privacy */}
+          {/* 6. Payments and Transactions */}
           <section className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4 text-center">6. Children&apos;s Privacy</h2>
+            <h2 className="text-3xl font-bold text-white mb-4 text-center">6. Payments and Transactions</h2>
+            <div className="space-y-2 text-white/70 text-left max-w-2xl mx-auto">
+              <p>
+                SportX360 is a listings and marketplace platform only. We do not provide, offer, or process any payment
+                services, escrow, or money transfers. Any payment or financial transaction arranged between users
+                (including but not limited to cash, bank transfers, mobile wallets, or third-party payment providers)
+                takes place directly between those users and outside of our control.
+              </p>
+              <p>
+                You are solely responsible for choosing how and with whom to pay or receive payment and for verifying
+                the legitimacy of any counterparty. SportX360 does not act as a party to any transaction and is not
+                responsible or liable for any payment issues, disputes, refunds, chargebacks, fraud, or losses arising
+                from transactions between users.
+              </p>
+            </div>
+          </section>
+
+          {/* 7. Children's Privacy */}
+          <section className="mb-8">
+            <h2 className="text-3xl font-bold text-white mb-4 text-center">7. Children&apos;s Privacy</h2>
             <p className="text-white/70 leading-relaxed text-left max-w-2xl mx-auto">
               Our services are not directed to individuals under the age of 13 (or higher where required by law). We do not knowingly collect personal information from children. If you believe we have collected such information, please contact us so we can delete it.
             </p>
           </section>
 
-          {/* 7. Contact Us */}
+          {/* 8. Contact Us */}
           <Card className="glass-card border-[#00FFFF]/30 bg-gradient-to-r from-[#00FFFF]/10 to-transparent">
             <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">7. Contact Us</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">8. Contact Us</h2>
               <p className="text-white/70 mb-4">
                 For privacy-related questions, requests, or complaints, please contact us at support@sportx360.com or at the contact details provided within the SportX360 app. We will respond in accordance with applicable law in Pakistan.
               </p>

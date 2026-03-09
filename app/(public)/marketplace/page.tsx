@@ -353,7 +353,7 @@ export default function MarketplacePage() {
               icon="store"
             />
           ) : (
-            groupedListings.map((group: any) => (
+            groupedListings.map((group: { category: string; totalCount: number; listings: Record<string, unknown>[] }) => (
               <div key={group.category} className="space-y-4">
                 {/* Category Header */}
                 <div className="flex items-center justify-between">
