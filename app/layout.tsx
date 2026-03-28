@@ -27,7 +27,14 @@ export const metadata: Metadata = {
     template: "%s | SportX360",
   },
   description:
-    "Find cricket players in Pakistan, join a team near you, book a ground in Lahore or Karachi, enter sports tournaments, hire umpires and scorers, and buy sports equipment — SportX360.",
+    "Find cricket players in Pakistan, join a cricket team near you, and connect with cricket players near you. Browse cricket teams in Pakistan, book grounds, tournaments, and gear — your sports marketplace Pakistan on SportX360.",
+  keywords: [
+    "find cricket players in Pakistan",
+    "join cricket team near me",
+    "cricket players near me",
+    "cricket teams Pakistan",
+    "sports marketplace Pakistan",
+  ],
   applicationName: "SportX360",
   openGraph: {
     type: "website",
@@ -36,13 +43,13 @@ export const metadata: Metadata = {
     siteName: "SportX360",
     title: "SportX360 — Sports Marketplace",
     description:
-      "Players, teams, tournaments, grounds, and sports equipment across Pakistan and worldwide.",
+      "Find cricket players in Pakistan, join a team near you, and explore cricket teams and sports listings across Pakistan and worldwide.",
   },
   twitter: {
     card: "summary_large_image",
     title: "SportX360 — Sports Marketplace",
     description:
-      "Connect with players and teams, book grounds, and shop sports gear in Pakistan.",
+      "Cricket players near you, cricket teams Pakistan, grounds, and sports marketplace listings.",
   },
   robots: { index: true, follow: true },
 };

@@ -83,6 +83,8 @@ export type BlogPostPayload = {
   excerpt?: string;
   content?: string;
   coverImageUrl?: string;
+  targetKeywords?: string;
+  secondaryKeywords?: string;
   authorName?: string;
   publishedAt?: string;
 };

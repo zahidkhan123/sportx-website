@@ -4,6 +4,7 @@
  */
 
 import type { Metadata } from "next";
+import { parseSecondaryKeywordPhrases } from "@/lib/blogKeywords";
 
 /** Public site origin for canonicals, OG URLs, and sitemap (set in production env). */
 export function getSiteUrl(): string {
@@ -214,12 +215,38 @@ export function buildListingJsonLd(listing: ListingLike): Record<string, unknown
   };
 }
 
+export { parseSecondaryKeywordPhrases } from "@/lib/blogKeywords";
+
+/** Meta keywords array: target phrase first, then secondaries (deduped). */
+export function buildBlogMetaKeywords(post: {
+  targetKeywords?: string;
+  secondaryKeywords?: string;
+}): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const push = (s: string) => {
+    const t = s.trim();
+    if (!t) return;
+    const k = t.toLowerCase();
+    if (seen.has(k)) return;
+    seen.add(k);
+    out.push(t);
+  };
+  if (post.targetKeywords) push(post.targetKeywords);
+  for (const p of parseSecondaryKeywordPhrases(post.secondaryKeywords)) {
+    push(p);
+  }
+  return out;
+}
+
 export function buildBlogPostMetadata(
   post: {
     title?: string;
     excerpt?: string;
     slug?: string;
     coverImageUrl?: string;
+    targetKeywords?: string;
+    secondaryKeywords?: string;
     authorName?: string;
     publishedAt?: string;
   } | null
@@ -235,9 +262,12 @@ export function buildBlogPostMetadata(
     (post.excerpt && post.excerpt.slice(0, 160)) ||
     "Sports news, tips, and updates from SportX360 — players, teams, and tournaments in Pakistan.";
 
+  const keywords = buildBlogMetaKeywords(post);
+
   return {
     title,
     description,
+    ...(keywords.length > 0 ? { keywords } : {}),
     alternates: { canonical: url },
     openGraph: {
       type: "article",
@@ -265,17 +295,21 @@ export function buildBlogArticleJsonLd(post: {
   excerpt?: string;
   slug?: string;
   coverImageUrl?: string;
+  targetKeywords?: string;
+  secondaryKeywords?: string;
   authorName?: string;
   publishedAt?: string;
 }): Record<string, unknown> {
   const site = getSiteUrl();
   const path = `/blogs/${post.slug}`;
+  const kw = buildBlogMetaKeywords(post);
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
     description: post.excerpt || post.description,
     image: post.coverImageUrl,
+    ...(kw.length > 0 ? { keywords: kw.join(", ") } : {}),
     datePublished: post.publishedAt,
     author: post.authorName
       ? { "@type": "Person", name: post.authorName }
@@ -297,7 +331,7 @@ export function buildOrganizationJsonLd(): Record<string, unknown> {
     name: "SportX360",
     url: site,
     description:
-      "Sports marketplace for players, teams, tournaments, grounds, and equipment in Pakistan and worldwide.",
+      "Sports marketplace Pakistan: find cricket players in Pakistan, join a cricket team near you, meet cricket players near you, discover cricket teams Pakistan, book grounds, tournaments, and buy sports equipment.",
     sameAs: [
       "https://play.google.com/store/apps/details?id=com.sportx360",
       "https://apps.apple.com/pk/app/sportx360/id6759158349",

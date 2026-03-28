@@ -7,6 +7,7 @@ import GoogleAds from "@/components/GoogleAds";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar } from "lucide-react";
 import Image from "next/image";
+import { parseSecondaryKeywordPhrases } from "@/lib/blogKeywords";
 
 function formatDate(iso?: string) {
   if (!iso) return null;
@@ -36,8 +37,8 @@ export function BlogPostClient({ slug }: { slug: string }) {
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-16">
-      <div className="flex flex-col lg:flex-row gap-8">
-        <article className="flex-1 min-w-0 max-w-3xl mx-auto lg:mx-0">
+      <div className="flex flex-col items-center lg:flex-row lg:items-start lg:justify-center gap-8 lg:gap-10">
+        <article className="w-full min-w-0 max-w-3xl shrink-0">
           <Link
             href="/blogs"
             className="inline-flex items-center text-sm text-white/70 hover:text-[#00FFFF] mb-8"
@@ -85,6 +86,44 @@ export function BlogPostClient({ slug }: { slug: string }) {
                 </div>
               </header>
 
+              {(post.targetKeywords ||
+                parseSecondaryKeywordPhrases(post.secondaryKeywords).length >
+                  0) && (
+                <section
+                  className="mb-8 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-4"
+                  aria-label="Article keywords"
+                >
+                  {post.targetKeywords ? (
+                    <div className="mb-3 last:mb-0">
+                      {/* <p className="text-xs font-semibold uppercase tracking-wide text-[#00FFFF]/90 mb-2">
+                        Target keywords
+                      </p> */}
+                      {/* <p className="text-sm text-white/90">{post.targetKeywords}</p> */}
+                    </div>
+                  ) : null}
+                  {parseSecondaryKeywordPhrases(post.secondaryKeywords).length >
+                  0 ? (
+                    <div>
+                      {/* <p className="text-xs font-semibold uppercase tracking-wide text-white/50 mb-2">
+                        Secondary keywords
+                      </p> */}
+                      <ul className="flex flex-wrap gap-2">
+                        {parseSecondaryKeywordPhrases(
+                          post.secondaryKeywords
+                        ).map((phrase) => (
+                          <li
+                            key={phrase}
+                            className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/80"
+                          >
+                            {phrase}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </section>
+              )}
+
               {post.coverImageUrl ? (
                 <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-white/5 mb-10">
                   <Image
@@ -114,7 +153,7 @@ export function BlogPostClient({ slug }: { slug: string }) {
           )}
         </article>
 
-        <aside className="w-full lg:w-80 shrink-0">
+        <aside className="w-full max-w-sm mx-auto lg:max-w-none lg:w-80 lg:mx-0 shrink-0">
           <GoogleAds
             adSlot="3814764721"
             adFormat="vertical"

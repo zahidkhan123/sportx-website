@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Calendar } from "lucide-react";
 import Image from "next/image";
+import { parseSecondaryKeywordPhrases } from "@/lib/blogKeywords";
 
 type BlogListItem = {
   _id: string;
@@ -15,6 +16,8 @@ type BlogListItem = {
   slug: string;
   excerpt?: string;
   coverImageUrl?: string;
+  targetKeywords?: string;
+  secondaryKeywords?: string;
   authorName?: string;
   publishedAt?: string;
 };
@@ -122,6 +125,38 @@ export default function BlogsPage() {
                             <p className="mt-3 text-sm text-white/70 line-clamp-3">
                               {post.excerpt}
                             </p>
+                          ) : null}
+                          {post.targetKeywords ||
+                          parseSecondaryKeywordPhrases(post.secondaryKeywords)
+                            .length > 0 ? (
+                            <div className="mt-3 space-y-2">
+                              {post.targetKeywords ? (
+                                <p className="text-xs text-white/55">
+                                  <span className="text-[#00FFFF]/80 font-medium">
+                                    Target:{" "}
+                                  </span>
+                                  <span className="text-white/75">
+                                    {post.targetKeywords}
+                                  </span>
+                                </p>
+                              ) : null}
+                              {parseSecondaryKeywordPhrases(
+                                post.secondaryKeywords
+                              ).length > 0 ? (
+                                <div className="flex flex-wrap gap-1.5">
+                                  {parseSecondaryKeywordPhrases(
+                                    post.secondaryKeywords
+                                  ).map((phrase) => (
+                                    <span
+                                      key={phrase}
+                                      className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white/60"
+                                    >
+                                      {phrase}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : null}
+                            </div>
                           ) : null}
                           <span className="mt-4 inline-block text-sm font-medium text-[#00FFFF]">
                             Read more →

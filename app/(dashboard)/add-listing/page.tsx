@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Info, Star, Rocket, FileText } from "lucide-react";
 import Link from "next/link";
 import GoogleAds from "@/components/GoogleAds";
+import { ImageUrlUploadField } from "@/components/ImageUrlUploadField";
 
 export default function AddListingPage() {
   const router = useRouter();
@@ -151,7 +152,7 @@ export default function AddListingPage() {
     }
 
     if (!formData.images[0] || formData.images[0].trim() === "") {
-      toast.error("Please add at least one image URL");
+      toast.error("Add at least one image (URL or upload)");
       return;
     }
 
@@ -336,24 +337,33 @@ export default function AddListingPage() {
                     </h3>
                     <div className="space-y-3">
                       <Label className="text-white text-sm font-medium">
-                        Image URLs <span className="text-red-500">*</span> (1-6
-                        images)
+                        Images <span className="text-red-500">*</span> (1–6 —
+                        URL or upload each)
                       </Label>
+                      <p className="text-xs text-white/50">
+                        You must be signed in to upload files (JPEG, PNG, GIF,
+                        WebP, max 10MB).
+                      </p>
                       {formData.images.map((image, index) => (
-                        <div key={index} className="flex gap-2">
-                          <Input
-                            type="url"
-                            value={image}
-                            onChange={(e) => updateImage(index, e.target.value)}
-                            placeholder={`Image URL ${index + 1}`}
-                            className="bg-white/5 border-white/10 text-white h-11"
-                          />
+                        <div
+                          key={index}
+                          className="flex flex-col sm:flex-row gap-2 sm:items-start"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <ImageUrlUploadField
+                              label={`Image ${index + 1}`}
+                              value={image}
+                              onChange={(url) => updateImage(index, url)}
+                              uploadName={`marketplace-ad-${index}`}
+                              required={index === 0}
+                            />
+                          </div>
                           {formData.images.length > 1 && (
                             <Button
                               type="button"
                               variant="outline"
                               onClick={() => removeImageField(index)}
-                              className="border-red-500/30 text-red-500 hover:bg-red-500/10 h-11"
+                              className="border-red-500/30 text-red-500 hover:bg-red-500/10 h-11 shrink-0 sm:mt-7"
                             >
                               Remove
                             </Button>

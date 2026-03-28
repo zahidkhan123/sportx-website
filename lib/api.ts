@@ -57,6 +57,32 @@ api.interceptors.response.use(
   }
 );
 
+/** Multipart image upload to S3. Requires logged-in user (Bearer token). */
+export const imagesAPI = {
+  uploadImage: async (file: File, name: string): Promise<string> => {
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("image", file);
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const response = await axios.post<{
+      success?: boolean;
+      data?: { image?: { url?: string } };
+      message?: string;
+    }>(`${API_BASE_URL}/api/images/upload`, formData, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        Accept: "application/json",
+      },
+    });
+    const url = response.data?.data?.image?.url;
+    if (!url) {
+      throw new Error(response.data?.message || "Upload failed");
+    }
+    return url;
+  },
+};
+
 // Location API
 export const locationAPI = {
   getCountries: async () => {
