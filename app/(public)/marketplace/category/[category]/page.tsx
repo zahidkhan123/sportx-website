@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { filterRealMarketplaceItems } from "@/lib/utils";
 
 export default function MarketplaceCategoryPage() {
   const router = useRouter();
@@ -29,7 +30,9 @@ export default function MarketplaceCategoryPage() {
     enabled: !!category,
   });
 
-  const items = data?.data || [];
+  const items = filterRealMarketplaceItems(
+    data?.data as Record<string, unknown>[] | undefined
+  );
   const pagination = data?.pagination || { page: 1, pages: 1, total: 0 };
 
   return (

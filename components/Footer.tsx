@@ -36,6 +36,36 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/players" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  Players
+                </Link>
+              </li>
+              <li>
+                <Link href="/teams" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  Teams
+                </Link>
+              </li>
+              <li>
+                <Link href="/grounds" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  Grounds
+                </Link>
+              </li>
+              <li>
+                <Link href="/tournaments" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  Tournaments
+                </Link>
+              </li>
+              <li>
+                <Link href="/equipment" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  Equipment
+                </Link>
+              </li>
+              <li>
+                <Link href="/discover/cricket-players-lahore" className="text-sm text-white/70 hover:text-[#00FFFF]">
+                  Cricket in Lahore
+                </Link>
+              </li>
+              <li>
                 <Link href="/blogs" className="text-sm text-white/70 hover:text-[#00FFFF]">
                   Blogs
                 </Link>

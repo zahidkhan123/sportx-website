@@ -14,7 +14,28 @@ function getLocationString(listing: Record<string, unknown>): string {
   if (location.city) return String(location.city);
   if (data.region) return String(data.region);
   if (listing.region) return String(listing.region);
+  if (data.where && data.areaInCity)
+    return `${String(data.areaInCity)}, ${String(data.where)}`;
+  if (data.where) return String(data.where);
   return "";
+}
+
+/** Mobile stores `intent`; older API rows may only set lookingForPlayers / lookingForOpponent. */
+function getEffectiveIntent(
+  listingType: string | undefined,
+  data: Record<string, unknown>
+): string {
+  const raw = data.intent;
+  if (typeof raw === "string") {
+    const u = raw.toUpperCase().replace(/-/g, "_");
+    if (u === "LOOKING_FOR" || u === "LOOKING FOR") return "LOOKING_FOR";
+    if (u === "AVAILABLE") return "AVAILABLE";
+  }
+  if (listingType === "team") {
+    if (data.lookingForOpponent === true) return "LOOKING_FOR";
+    if (data.lookingForPlayers === true) return "LOOKING_FOR";
+  }
+  return "AVAILABLE";
 }
 
 function formatDateForDisplay(dateString: unknown): string {
@@ -49,8 +70,7 @@ export function generateDescriptiveSubtitle(
   const data = (listing.data as Record<string, unknown>) || {};
   const listingType = listing.listingType as string | undefined;
   const location = getLocationString(listing);
-  // Get intent: AVAILABLE or LOOKING_FOR (defaults to AVAILABLE for backward compatibility)
-  const intent = (data.intent as string) || "AVAILABLE";
+  const intent = getEffectiveIntent(listingType, data);
 
   switch (listingType) {
     case "player": {
@@ -142,14 +162,17 @@ export function generateDescriptiveSubtitle(
         (data.availableDays as string) ||
         (data.playingOn as string) ||
         "";
-      if (data.lookingForUmpire) {
-        return `${userName} is looking for an Umpire${location ? ` on ${location}` : ""} for Tournament${startDate ? ` on ${startDate}` : ""}`;
-      }
-      if (data.lookingForScorer) {
-        return `${userName} is looking for a Scorer${location ? ` on ${location}` : ""} for Tournament${startDate ? ` on ${startDate}` : ""}`;
-      }
-      if (data.lookingForTeam) {
-        return `${userName} is an Organizer and is looking for a Team for their Tournament${location ? ` in ${location}` : ""}${startDate ? `. The tournament begins on ${startDate}${playingDays ? ` it will be played on ${playingDays}` : ""}` : ""}`;
+      if (intent === "LOOKING_FOR") {
+        if (data.lookingForUmpire !== undefined && data.lookingForUmpire) {
+          return `${userName} is looking for an Umpire${location ? ` on ${location}` : ""} for Tournament${startDate ? ` on ${startDate}` : ""}`;
+        }
+        if (data.lookingForScorer !== undefined && data.lookingForScorer) {
+          return `${userName} is looking for a Scorer${location ? ` on ${location}` : ""} for Tournament${startDate ? ` on ${startDate}` : ""}`;
+        }
+        if (data.lookingForTeam !== undefined && data.lookingForTeam) {
+          return `${userName} is an Organizer and is looking for a Team for their Tournament${location ? ` in ${location}` : ""}${startDate ? `. The tournament begins on ${startDate}${playingDays ? ` it will be played on ${playingDays}` : ""}` : ""}`;
+        }
+        return `${userName} is looking for a Tournament to join${location ? ` in ${location}` : ""}${startDate ? ` starting ${startDate}` : ""}`;
       }
       return `${userName} is organizing ${tournamentName}${location ? ` in ${location} and looking for teams to join` : ""}${startDate ? ` starting ${startDate}` : ""}`;
     }

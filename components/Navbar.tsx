@@ -5,13 +5,11 @@ import { usePathname } from "next/navigation";
 import {
   Menu,
   X,
-  ShoppingBag,
   User,
   LogOut,
   Plus,
   Package,
   CreditCard,
-  MapPin,
   ChevronDown,
   MessageCircle,
 } from "lucide-react";
@@ -22,6 +20,12 @@ import { cn } from "@/lib/utils";
 import { useLocation, DEFAULT_LOCATION } from "@/contexts/LocationContext";
 import { useChatUnread } from "@/contexts/ChatUnreadContext";
 import { SearchableDropdown } from "@/components/SearchableDropdown";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -39,13 +43,22 @@ export function Navbar() {
     setUser(authService.getCurrentUser());
   }, []);
 
-  const navItems = [
+  const mainNavItems = [
     { href: "/home", label: "Home" },
     { href: "/marketplace", label: "Marketplace" },
     { href: "/sports", label: "Sports" },
     { href: "/blogs", label: "Blogs" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
+  ];
+
+  const exploreNavItems = [
+    { href: "/players", label: "Players" },
+    { href: "/teams", label: "Teams" },
+    { href: "/grounds", label: "Grounds" },
+    { href: "/tournaments", label: "Tournaments" },
+    { href: "/equipment", label: "Equipment" },
+    { href: "/discover/cricket-players-lahore", label: "Cricket in Lahore" },
   ];
 
   // Prepare cities data for dropdown (add "Pakistan" option at the top)
@@ -66,8 +79,27 @@ export function Navbar() {
     if (href === "/blogs") {
       return pathname === "/blogs" || pathname.startsWith("/blogs/");
     }
+    if (href === "/players") {
+      return pathname === "/players" || pathname.startsWith("/player/");
+    }
+    if (href === "/teams") {
+      return pathname === "/teams" || pathname.startsWith("/team/");
+    }
+    if (href === "/grounds") {
+      return pathname === "/grounds" || pathname.startsWith("/ground/");
+    }
+    if (href === "/tournaments") {
+      return (
+        pathname === "/tournaments" || pathname.startsWith("/tournament/")
+      );
+    }
+    if (href.startsWith("/discover/")) {
+      return pathname.startsWith("/discover/");
+    }
     return pathname === href;
   };
+
+  const exploreNavActive = exploreNavItems.some((item) => navLinkActive(item.href));
 
   const handleCitySelect = (city: { name: string; value: string }) => {
     if (city.value === "all") {
@@ -113,7 +145,7 @@ export function Navbar() {
                 }
               />
             </div>
-            {navItems.map((item) => (
+            {mainNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -127,6 +159,41 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn(
+                  "inline-flex items-center gap-1 text-sm font-medium transition-colors outline-none",
+                  exploreNavActive
+                    ? "text-[#00FFFF]"
+                    : "text-white/70 hover:text-white"
+                )}
+              >
+                Explore
+                <ChevronDown className="h-4 w-4 opacity-80" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="min-w-[200px] border-white/10 bg-zinc-950 text-white"
+              >
+                {exploreNavItems.map((item) => (
+                  <DropdownMenuItem
+                    key={item.href}
+                    asChild
+                    className="text-white focus:bg-white/10 focus:text-[#00FFFF]"
+                  >
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        "cursor-pointer",
+                        navLinkActive(item.href) && "text-[#00FFFF]"
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Auth Buttons */}
@@ -246,13 +313,31 @@ export function Navbar() {
               />
             </div>
 
-            {navItems.map((item) => (
+            {mainNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
                   "block px-4 py-2 text-sm font-medium transition-colors",
+                  navLinkActive(item.href)
+                    ? "text-[#00FFFF]"
+                    : "text-white/70 hover:text-white"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <div className="px-4 pt-2 pb-1 text-xs font-semibold uppercase tracking-wide text-white/40">
+              Explore
+            </div>
+            {exploreNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "block pl-8 pr-4 py-2 text-sm font-medium transition-colors",
                   navLinkActive(item.href)
                     ? "text-[#00FFFF]"
                     : "text-white/70 hover:text-white"

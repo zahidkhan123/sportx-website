@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, X, DollarSign, MapPin, Tag, Plus, ChevronRight } from "lucide-react";
 import { authService } from "@/lib/auth";
+import { filterRealMarketplaceItems } from "@/lib/utils";
 import { useLocation } from "@/contexts/LocationContext";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -103,7 +104,9 @@ export default function MarketplacePage() {
   });
 
   const groupedListings = groupedData?.data || [];
-  const filteredItems = filteredData?.data || [];
+  const filteredItems = filterRealMarketplaceItems(
+    filteredData?.data as Record<string, unknown>[] | undefined
+  );
 
   const handleCategoryClick = (categoryName: string) => {
     setCategory(categoryName);

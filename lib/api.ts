@@ -226,6 +226,13 @@ export const listingsAPI = {
     const response = await api.post(`/api/listings/${id}/views`);
     return response.data;
   },
+  /** Related listings for detail pages (SEO internal linking). */
+  getRelated: async (listingId: string, limit = 8) => {
+    const response = await api.get(`/api/listings/related/${listingId}`, {
+      params: { limit },
+    });
+    return response.data;
+  },
 };
 
 // Marketplace API

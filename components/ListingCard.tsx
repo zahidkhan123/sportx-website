@@ -6,6 +6,20 @@ import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Phone, Star, Rocket } from "lucide-react";
 import Image from "next/image";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { generateDescriptiveSubtitle as buildListingSubtitle } from "@/lib/listingDescriptiveSubtitle";
+
+export type ListingImageEntry = { url?: string } | string;
+
+function firstListingImageUrl(
+  images?: ListingImageEntry[] | null
+): string | null {
+  if (!Array.isArray(images) || images.length === 0) return null;
+  const first = images[0];
+  if (typeof first === "string" && first.trim()) return first;
+  if (first && typeof first === "object" && typeof first.url === "string" && first.url.trim())
+    return first.url;
+  return null;
+}
 
 interface ListingCardProps {
   title: string;
@@ -14,6 +28,8 @@ interface ListingCardProps {
   city?: string;
   href: string;
   description?: string;
+  /** Post photos from API — shown in a circle beside text (fallback: profile avatar). */
+  images?: ListingImageEntry[] | null;
   userId?: {
     profileImage?: string;
     name?: string;
@@ -34,6 +50,7 @@ export function ListingCard({
   city,
   href,
   description,
+  images,
   userId,
   createdAt,
   listingData,
@@ -98,314 +115,20 @@ export function ListingCard({
     return diffYears === 1 ? "1 year ago" : `${diffYears} years ago`;
   };
 
-  const formatDateForDisplay = (dateString?: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const days = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    const dayName = days[date.getDay()];
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year} (${dayName})`;
-  };
+  /** Same sentences as SportsHub `utils/listingDescriptiveSubtitle.js` (intent + sport type). */
+  const cardSubtitle =
+    listingType && listingData != null
+      ? buildListingSubtitle({
+          listingType,
+          data: listingData,
+          userId: userId ?? {},
+          location: location ?? {},
+          description,
+          title,
+        } as Record<string, unknown>)
+      : description || title;
 
-  const getLocationString = () => {
-    if (location?.address) return location.address as string;
-    if (listingData?.location) return listingData.location as string;
-    if (listingData?.address) return listingData.address as string;
-    if (listingData?.area && listingData?.city)
-      return `${listingData.area}, ${listingData.city}`;
-    if (listingData?.city) return listingData.city as string;
-    if (location?.city) return location.city as string;
-    if (listingData?.region) return listingData.region as string;
-    if (city) return city;
-    return "";
-  };
-
-  const generateDescriptiveSubtitle = () => {
-    if (!listingType || !listingData) return description || title;
-
-    const userName = userId?.name || userId?.fullName || "Someone";
-    const loc = getLocationString();
-    const data = listingData;
-    // Get intent: AVAILABLE or LOOKING_FOR (defaults to AVAILABLE for backward compatibility)
-    const intent = (data.intent as string) || "AVAILABLE";
-
-    switch (listingType) {
-      case "player": {
-        const playerName = (data.playerName || data.name || userName) as string;
-        const position = (data.position ||
-          data.preferredPosition ||
-          data.role ||
-          "Player") as string;
-        const bowlingStyle = (data.bowlingStyle ||
-          data.bowlingType ||
-          "") as string;
-        const battingStyle = (data.battingStyle ||
-          data.battingType ||
-          "") as string;
-        let positionStr = position;
-
-        if (
-          bowlingStyle &&
-          (position.includes("Bowler") || position === "Bowler")
-        ) {
-          positionStr = `${position} (${bowlingStyle})`;
-        } else if (
-          battingStyle &&
-          (position.includes("Batsman") || position === "Batsman")
-        ) {
-          positionStr = `${position} (${battingStyle})`;
-        } else if (
-          bowlingStyle &&
-          (position === "All-rounder" || position.includes("All-rounder"))
-        ) {
-          positionStr = `All-rounder (${bowlingStyle})`;
-        }
-
-        if (intent === "LOOKING_FOR") {
-          return `${playerName} is looking for a Team to join as a ${positionStr}${
-            loc ? ` in ${loc}` : ""
-          }`;
-        }
-        return `${playerName} is available as a ${positionStr}${
-          loc ? ` in ${loc}` : ""
-        }`;
-      }
-      case "team": {
-        const teamName = (data.teamName || data.name || "their team") as string;
-        const lookingForOpponent = (data.lookingForOpponent ||
-          false) as boolean;
-        const lookingForPlayers =
-          data.lookingForPlayers !== undefined ? data.lookingForPlayers : true;
-        const position = (data.lookingForPosition ||
-          data.position ||
-          data.lookingFor ||
-          "players") as string;
-
-        if (lookingForOpponent) {
-          const matchDate =
-            data.matchDate || data.date
-              ? formatDateForDisplay((data.matchDate || data.date) as string)
-              : "";
-          return `${userName}'s team (${teamName}) is looking for an opponent to play a Match${
-            loc ? ` in ${loc}` : ""
-          }${matchDate ? ` on ${matchDate}` : ""}`;
-        }
-
-        if (lookingForPlayers && position && position !== "players") {
-          const bowlingStyle = (data.bowlingStyle || "") as string;
-          const battingStyle = (data.battingStyle || "") as string;
-          let positionStr = position;
-
-          if (
-            bowlingStyle &&
-            (position.includes("Bowler") || position === "Bowler")
-          ) {
-            positionStr = `${position} (${bowlingStyle})`;
-          } else if (
-            battingStyle &&
-            (position.includes("Batsman") || position === "Batsman")
-          ) {
-            positionStr = `${position} (${battingStyle})`;
-          } else if (bowlingStyle && position === "All-rounder") {
-            positionStr = `All-rounder (${bowlingStyle})`;
-          }
-
-          return `${userName}'s team (${teamName}) is looking for a ${positionStr} to join his team${
-            loc ? ` in ${loc}` : ""
-          }`;
-        }
-
-        return `${userName}'s team (${teamName})${loc ? ` in ${loc}` : ""}`;
-      }
-      case "tournament": {
-        const tournamentName = (data.tournamentName ||
-          data.name ||
-          "Tournament") as string;
-        const startDate =
-          data.startDate || data.date
-            ? formatDateForDisplay((data.startDate || data.date) as string)
-            : "";
-        const playingDays = (data.playingDays ||
-          data.availableDays ||
-          data.playingOn ||
-          "") as string;
-
-        if (data.lookingForUmpire !== undefined && data.lookingForUmpire) {
-          return `${userName} is looking for an Umpire${
-            loc ? ` on ${loc}` : ""
-          } for Tournament${startDate ? ` on ${startDate}` : ""}`;
-        }
-
-        if (data.lookingForScorer !== undefined && data.lookingForScorer) {
-          return `${userName} is looking for a Scorer${
-            loc ? ` on ${loc}` : ""
-          } for Tournament${startDate ? ` on ${startDate}` : ""}`;
-        }
-
-        if (data.lookingForTeam !== undefined && data.lookingForTeam) {
-          return `${userName} is an Organizer and is looking for a Team for their Tournament${
-            loc ? ` in ${loc}` : ""
-          }${
-            startDate
-              ? `. The tournament begins on ${startDate}${
-                  playingDays ? ` it will be played on ${playingDays}` : ""
-                }`
-              : ""
-          }`;
-        }
-
-        return `${userName} is organizing ${tournamentName}${
-          loc ? ` in ${loc}` : ""
-        }${startDate ? ` starting ${startDate}` : ""}`;
-      }
-      case "ground": {
-        const groundName = (data.groundName ||
-          data.name ||
-          "a ground") as string;
-        
-        if (intent === "LOOKING_FOR") {
-          // Player looking for ground
-          const bookingDate = data.bookingDateAndTime || data.bookingDate
-            ? formatDateForDisplay((data.bookingDateAndTime || data.bookingDate) as string)
-            : "";
-          return `${userName} is looking for ${groundName} to play${
-            loc ? ` in ${loc}` : ""
-          }${bookingDate ? ` on ${bookingDate}` : ""}`;
-        }
-        
-        // Ground owner posting availability
-        {
-          const parts: string[] = [];
-          parts.push(`${groundName} is available for booking`);
-          
-          if (loc) {
-            parts.push(`in ${loc}`);
-          }
-          
-          // Add pricing information
-          const pricingParts: string[] = [];
-          if (data.hourlyRate) {
-            pricingParts.push(`PKR ${data.hourlyRate}/hour`);
-          }
-          if (data.dailyRate) {
-            pricingParts.push(`PKR ${data.dailyRate}/day`);
-          }
-          if (pricingParts.length > 0) {
-            parts.push(`(${pricingParts.join(", ")})`);
-          }
-          
-          // Add capacity
-          if (data.capacity) {
-            parts.push(`Capacity: ${data.capacity} players`);
-          }
-          
-          // Add availability details
-          const availabilityParts: string[] = [];
-          if (data.availableDays) {
-            availabilityParts.push(data.availableDays as string);
-          }
-          if (data.availableTimings) {
-            availabilityParts.push(data.availableTimings as string);
-          }
-          if (availabilityParts.length > 0) {
-            parts.push(`Available: ${availabilityParts.join(", ")}`);
-          }
-          
-          return parts.join(" · ");
-        }
-      }
-      case "coach": {
-        const coachName = (data.coachName || data.name || userName) as string;
-        const coachingType = (data.coachingType ||
-          data.serviceType ||
-          "Coaching") as string;
-        const availableDays = (data.availableDays ||
-          data.playingDays ||
-          "") as string;
-        const experience = data.experience
-          ? ` with ${data.experience} years experience`
-          : "";
-
-        const coachingTypeStr = Array.isArray(coachingType)
-          ? coachingType.join(", ")
-          : coachingType;
-
-        if (intent === "LOOKING_FOR") {
-          return `${userName} is looking for a Coach${
-            loc ? ` in ${loc}` : ""
-          }${coachingTypeStr !== "Coaching" ? ` for ${coachingTypeStr}` : ""}`;
-        }
-        return `${coachName} is offering ${coachingTypeStr}${
-          loc ? ` in ${loc}` : ""
-        }${experience}${availableDays ? ` (${availableDays})` : ""}`;
-      }
-      case "umpire":
-      case "referee": {
-        const lookingForWork =
-          data.lookingForWork !== undefined ? data.lookingForWork : true;
-        const experience = data.experience
-          ? `${data.experience} years experience`
-          : "";
-
-        if (lookingForWork) {
-          return `${userName} is looking for ${listingType} opportunities${
-            loc ? ` in ${loc}` : ""
-          }${experience ? ` (${experience})` : ""}`;
-        }
-
-        return `${userName} is an experienced ${listingType}${
-          loc ? ` in ${loc}` : ""
-        }${experience ? ` (${experience})` : ""}`;
-      }
-      case "scorer": {
-        const lookingForWork =
-          data.lookingForWork !== undefined ? data.lookingForWork : true;
-        const experience = data.experience
-          ? `${data.experience} years experience`
-          : "";
-
-        if (lookingForWork) {
-          return `${userName} is looking for Scorer opportunities${
-            loc ? ` in ${loc}` : ""
-          }${experience ? ` (${experience})` : ""}`;
-        }
-
-        return `${userName} is an experienced Scorer${loc ? ` in ${loc}` : ""}${
-          experience ? ` (${experience})` : ""
-        }`;
-      }
-      case "commentator": {
-        const lookingForWork =
-          data.lookingForWork !== undefined ? data.lookingForWork : true;
-        const experience = data.experience
-          ? `${data.experience} years experience`
-          : "";
-
-        if (lookingForWork) {
-          return `${userName} is looking for Commentator opportunities${
-            loc ? ` in ${loc}` : ""
-          }${experience ? ` (${experience})` : ""}`;
-        }
-
-        return `${userName} is an experienced Commentator${
-          loc ? ` in ${loc}` : ""
-        }${experience ? ` (${experience})` : ""}`;
-      }
-      default:
-        return description || title;
-    }
-  };
-
+  const name = userId?.name || userId?.fullName || "Anonymous";
   const profilePicUrl =
     userId?.profileImage ||
     `https://via.placeholder.com/40?text=${(
@@ -413,7 +136,14 @@ export function ListingCard({
       userId?.fullName?.[0] ||
       "U"
     ).toUpperCase()}`;
-  const name = userId?.name || userId?.fullName || "Anonymous";
+  const listingPhotoUrl = firstListingImageUrl(images ?? null);
+  const circleImageSrc = listingPhotoUrl || profilePicUrl;
+  const circleImageAlt = listingPhotoUrl ? title : name;
+
+  const imgUnoptimized =
+    typeof circleImageSrc === "string" &&
+    circleImageSrc.startsWith("http") &&
+    !circleImageSrc.includes("localhost");
 
   return (
     <Link href={href}>
@@ -439,18 +169,19 @@ export function ListingCard({
         )}
 
         <CardContent className="p-6">
-          {/* Profile Row */}
-          <div className="flex items-center gap-4 mb-3">
-            <div className="relative w-12 h-12 flex-shrink-0">
+          {/* Listing photo in circle + meta (no full-width image above text) */}
+          <div className="flex items-start gap-4 mb-3">
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-white/15 bg-white/5 ring-2 ring-black/20">
               <Image
-                src={profilePicUrl as string}
-                alt={name as string}
-                width={48}
-                height={48}
-                className="rounded-full object-cover"
+                src={circleImageSrc as string}
+                alt={circleImageAlt}
+                fill
+                className="object-cover"
+                sizes="64px"
+                unoptimized={imgUnoptimized}
               />
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 pt-0.5">
               <div className="flex items-center gap-1.5">
                 <p className="text-white font-bold text-base truncate">{name}</p>
                 {userId?.isVerified && <VerifiedBadge size="md" />}
@@ -475,9 +206,7 @@ export function ListingCard({
 
           {/* Description */}
           <p className="text-white text-base mb-4 line-clamp-3 leading-relaxed">
-            {listingType && listingData
-              ? generateDescriptiveSubtitle()
-              : description || title}
+            {cardSubtitle}
           </p>
 
           {/* Bottom Row */}

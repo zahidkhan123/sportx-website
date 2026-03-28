@@ -354,6 +354,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useLocation } from "@/contexts/LocationContext";
+import { getListingHref } from "@/lib/seo";
 
 // Category gradients/icons matching mobile DashboardHomeScreen
 const CATEGORY_GRADIENTS: Record<string, [string, string]> = {
@@ -371,6 +372,14 @@ const CATEGORIES = [
   { id: "ground", label: "Grounds", icon: MapPin },
   { id: "officials", label: "Umpires / Scorers", icon: Ribbon },
 ];
+
+const CATEGORY_HREF: Record<string, string> = {
+  player: "/players",
+  team: "/teams",
+  tournament: "/tournaments",
+  ground: "/grounds",
+  officials: "/sports",
+};
 
 export default function HomePage() {
   const queryClient = useQueryClient();
@@ -758,7 +767,7 @@ export default function HomePage() {
                       return (
                         <Link
                           key={id}
-                          href={`/sports/${id}`}
+                          href={getListingHref({ _id: id, listingType: type })}
                           className="group rounded-2xl border border-white/10 bg-white/5 p-5 transition-all hover:border-[#00FFA3]/25 hover:bg-white/[0.08]"
                         >
                           <div className="flex items-start justify-between">
@@ -896,7 +905,7 @@ export default function HomePage() {
                     ];
                     const Icon = cat.icon;
                     return (
-                      <Link key={cat.id} href="/sports">
+                      <Link key={cat.id} href={CATEGORY_HREF[cat.id] || "/sports"}>
                         <div
                           className="group relative flex min-h-[140px] flex-col items-center justify-center rounded-2xl p-6 transition hover:scale-[1.02] hover:shadow-lg"
                           style={{
@@ -944,7 +953,7 @@ export default function HomePage() {
                       return (
                         <Link
                           key={id}
-                          href={`/sports/${id}`}
+                          href={getListingHref({ _id: id, listingType: type })}
                           className="group rounded-2xl border border-white/10 bg-white/5 p-5 transition-all hover:border-[#00FFA3]/25 hover:bg-white/[0.08]"
                         >
                           <div className="flex items-start justify-between">

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { notFound, redirect } from "next/navigation";
 import { ListingDetailsClient } from "@/components/listings/ListingDetailsClient";
 import { fetchListingById } from "@/lib/server-api";
-import { buildListingJsonLd, buildListingMetadata } from "@/lib/seo";
+import { buildListingJsonLd, buildListingMetadata, getListingHref } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 type Props = { params: Promise<{ id: string }> };
@@ -12,12 +13,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return buildListingMetadata(listing);
 }
 
-export default async function SportsListingPage({ params }: Props) {
+export default async function TournamentListingPage({ params }: Props) {
   const { id } = await params;
   const listing = await fetchListingById(id);
+  if (!listing) notFound();
+  const path = getListingHref(listing as { _id: string; listingType?: string });
+  if (path !== `/tournament/${id}`) redirect(path);
   return (
     <>
-      {listing ? <JsonLd data={buildListingJsonLd(listing)} /> : null}
+      <JsonLd data={buildListingJsonLd(listing)} />
       <ListingDetailsClient listingId={id} />
     </>
   );
