@@ -43,6 +43,7 @@ export function Navbar() {
     { href: "/home", label: "Home" },
     { href: "/marketplace", label: "Marketplace" },
     { href: "/sports", label: "Sports" },
+    { href: "/blogs", label: "Blogs" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];
@@ -60,6 +61,13 @@ export function Navbar() {
           name: selectedLocation.city || "Pakistan",
           value: selectedLocation.city || "all",
         };
+
+  const navLinkActive = (href: string) => {
+    if (href === "/blogs") {
+      return pathname === "/blogs" || pathname.startsWith("/blogs/");
+    }
+    return pathname === href;
+  };
 
   const handleCitySelect = (city: { name: string; value: string }) => {
     if (city.value === "all") {
@@ -111,7 +119,7 @@ export function Navbar() {
                 href={item.href}
                 className={cn(
                   "text-sm font-medium transition-colors",
-                  pathname === item.href
+                  navLinkActive(item.href)
                     ? "text-[#00FFFF]"
                     : "text-white/70 hover:text-white"
                 )}
@@ -245,7 +253,7 @@ export function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
                   "block px-4 py-2 text-sm font-medium transition-colors",
-                  pathname === item.href
+                  navLinkActive(item.href)
                     ? "text-[#00FFFF]"
                     : "text-white/70 hover:text-white"
                 )}

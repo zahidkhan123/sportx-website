@@ -620,29 +620,31 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              {/* Store badges on the right side of hero banner */}
-              <div className="flex w-full md:w-auto md:justify-end justify-start items-center">
-                <div className="flex flex-col md:flex-row gap-4 items-center md:items-center">
+              {/* Store badges — centered on mobile, right-aligned from md */}
+              <div className="flex w-full items-center justify-center md:w-auto md:justify-end">
+                <div className="flex flex-col items-center gap-4 md:flex-row md:items-center">
                   <Link
                     href="https://play.google.com/store/apps/details?id=com.sportx360"
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="flex"
                   >
                     <img
                       src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
                       alt="Get it on Google Play"
-                      className="h-18 md:h-18 w-auto"
+                      className="h-18 w-auto"
                     />
                   </Link>
                   <Link
-                    href="https://apps.apple.com/us/app/sportx360/id6759158349"
+                    href="https://apps.apple.com/pk/app/sportx360/id6759158349"
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="flex"
                   >
                     <img
                       src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83"
                       alt="Download on the App Store"
-                      className="h-10 md:h-12 w-auto"
+                      className="h-12 w-auto"
                     />
                   </Link>
                 </div>
@@ -973,40 +975,28 @@ export default function HomePage() {
                   <p className="mx-auto mt-4 max-w-xl text-lg text-white/70">
                     Get the full SportX360 experience on your phone — post listings, chat, and manage everything on the go.
                   </p>
-                  <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+                  <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap">
                     <Link
                       href="https://play.google.com/store/apps/details?id=com.sportx360"
                       target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      {/* <Button
-                        size="lg"
-                        variant="ghost"
-                        className="border-white/20 text-white hover:bg-white/10 px-7 py-5 min-h-[64px] min-w-[240px]"
-                      > */}
-                        <img
-                          src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-                          alt="Get it on Google Play"
-                          className="mr-3 h-20 w-auto" // Increased icon size
-                        />
-                        {/* Get it on Google Play */}
-                      {/* </Button> */}
+                      <img
+                        src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+                        alt="Get it on Google Play"
+                        className="h-20 w-auto"
+                      />
                     </Link>
                     <Link
-                      href="https://apps.apple.com/us/app/sportx360/id6759158349"
+                      href="https://apps.apple.com/pk/app/sportx360/id6759158349"
                       target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      {/* <Button
-                        size="lg"
-                        variant="ghost"
-                        className="border-white/20 text-white hover:bg-white/10 px-7 py-5 min-h-[64px] min-w-[240px]"
-                      > */}
-                        <img
-                          src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83"
-                          // alt="Download on the App Store"
-                          className="mr-3 h-14 w-auto" // Increased icon size
-                        />
-                        {/* Download on the App Store */}
-                      {/* /</Button> */}
+                      <img
+                        src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83"
+                        alt="Download on the App Store"
+                        className="h-14 w-auto"
+                      />
                     </Link>
                   </div>
                 </div>

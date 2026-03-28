@@ -576,6 +576,20 @@ export const feedbackAPI = {
   },
 };
 
+// Blog posts (public — published only)
+export const blogsAPI = {
+  getPublished: async (params?: { page?: number; limit?: number }) => {
+    const response = await api.get("/api/blogs", { params });
+    return response.data;
+  },
+  getBySlug: async (slug: string) => {
+    const response = await api.get(
+      `/api/blogs/slug/${encodeURIComponent(slug)}`
+    );
+    return response.data;
+  },
+};
+
 // Support / Help & Feedback API (contact form)
 export const supportAPI = {
   submitContact: async (data: {
