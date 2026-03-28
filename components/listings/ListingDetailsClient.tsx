@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { listingsAPI, chatAPI } from "@/lib/api";
 import { getListingHref } from "@/lib/seo";
+import { generateDescriptiveSubtitle as buildRelatedListingSubtitle } from "@/lib/listingDescriptiveSubtitle";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -51,7 +52,11 @@ export function ListingDetailsClient({ listingId }: { listingId: string }) {
 
   const listing = data?.data;
   const relatedBuckets = relatedRes?.data as
-    | { similar?: Record<string, unknown>[]; nearby?: Record<string, unknown>[] }
+    | {
+        sameOwner?: Record<string, unknown>[];
+        similar?: Record<string, unknown>[];
+        nearby?: Record<string, unknown>[];
+      }
     | undefined;
 
   const formatDate = (dateString?: string) => {
@@ -801,6 +806,7 @@ export function ListingDetailsClient({ listingId }: { listingId: string }) {
             const seen = new Set<string>();
             const merged: Record<string, unknown>[] = [];
             for (const item of [
+              ...(relatedBuckets.sameOwner || []),
               ...(relatedBuckets.similar || []),
               ...(relatedBuckets.nearby || []),
             ]) {
@@ -821,11 +827,16 @@ export function ListingDetailsClient({ listingId }: { listingId: string }) {
                 </p>
                 <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {merged.map((item) => {
-                    const id = String((item as { _id?: string })._id);
-                    const title = (item as { title?: string }).title || "Listing";
-                    const href = getListingHref(item as { _id: string; listingType?: string });
-                    const st = (item as { sportType?: string }).sportType;
-                    const lt = (item as { listingType?: string }).listingType;
+                    const row = item as Record<string, unknown>;
+                    const id = String(row._id ?? "");
+                    const title = (row.title as string) || "Listing";
+                    const href = getListingHref({
+                      _id: id,
+                      listingType: row.listingType as string,
+                    });
+                    const st = row.sportType as string | undefined;
+                    const lt = row.listingType as string | undefined;
+                    const subtitle = buildRelatedListingSubtitle(row);
                     return (
                       <li key={id}>
                         <Link
@@ -836,7 +847,12 @@ export function ListingDetailsClient({ listingId }: { listingId: string }) {
                             {lt ? formatSport(lt) : "Listing"}
                             {st ? ` · ${formatSport(st)}` : ""}
                           </span>
-                          <p className="mt-2 font-medium text-white line-clamp-2">{title}</p>
+                          <p className="mt-2 font-medium text-white line-clamp-2">
+                            {title}
+                          </p>
+                          <p className="mt-2 text-sm text-white/65 line-clamp-3 leading-relaxed">
+                            {subtitle}
+                          </p>
                         </Link>
                       </li>
                     );
