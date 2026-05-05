@@ -3,8 +3,14 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, Star, Rocket } from "lucide-react";
+import { MapPin, Heart, Rocket } from "lucide-react";
+import { FeaturedBadge } from "@/components/FeaturedBadge";
+import {
+  type FeaturedTierId,
+  resolveMarketplaceFeaturedTier,
+} from "@/constants/featuredTiers.constants";
 import { useState } from "react";
+import type { MarketplaceProductCondition } from "@/lib/api";
 
 interface MarketplaceListingCardProps {
   id: string;
@@ -15,9 +21,10 @@ interface MarketplaceListingCardProps {
   image?: string;
   location?: string;
   category?: string;
-  condition?: "New" | "Used";
+  condition?: MarketplaceProductCondition;
   viewsCount?: number;
   isFeatured?: boolean;
+  featuredTier?: FeaturedTierId;
   isBoosted?: boolean;
   isWishlisted?: boolean;
   href: string;
@@ -36,12 +43,17 @@ export function MarketplaceListingCard({
   condition,
   viewsCount,
   isFeatured = false,
+  featuredTier: featuredTierProp,
   isBoosted = false,
   isWishlisted = false,
   href,
   status,
   onWishlistToggle,
 }: MarketplaceListingCardProps) {
+  const placementTier = resolveMarketplaceFeaturedTier({
+    featuredTier: featuredTierProp,
+    isFeatured,
+  });
   const [wishlisted, setWishlisted] = useState(isWishlisted);
 
   const priceDisplay =
@@ -73,19 +85,15 @@ export function MarketplaceListingCard({
             </div>
           )}
 
-          {/* Featured Badge */}
-          {isFeatured && (
+          {placementTier && (
             <div className="absolute top-3 left-3 z-10">
-              <Badge className="bg-gradient-to-r from-[#00FFA3] to-[#00CFFF] text-black border-0 px-2.5 py-1 text-xs font-bold flex items-center gap-1 shadow-lg">
-                <Star className="h-3 w-3 fill-black" />
-                Featured
-              </Badge>
+              <FeaturedBadge tier={placementTier} />
             </div>
           )}
 
           {/* Boost Badge - Show even if featured, positioned below featured badge */}
           {isBoosted && (
-            <div className={`absolute ${isFeatured ? "top-12 left-3" : "top-3 left-3"} z-10`}>
+            <div className={`absolute ${placementTier ? "top-12 left-3" : "top-3 left-3"} z-10`}>
               <Badge className="bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white border-0 px-2.5 py-1 text-xs font-bold flex items-center gap-1 shadow-lg">
                 <Rocket className="h-3 w-3 fill-white" />
                 Boosted

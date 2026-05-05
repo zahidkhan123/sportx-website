@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { marketplaceAPI } from "@/lib/api";
+import { marketplaceAPI, type MarketplaceProductCondition } from "@/lib/api";
 import { MarketplaceListingCard } from "@/components/MarketplaceListingCard";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -78,9 +78,12 @@ export default function MarketplaceCategoryPage() {
                 image={(item.images as string[])?.[0]}
                 location={item.location as string}
                 category={item.category as string}
-                condition={item.condition as "New" | "Used"}
+                condition={item.condition as MarketplaceProductCondition}
                 viewsCount={item.viewsCount as number}
                 isFeatured={item.isFeatured as boolean}
+                featuredTier={
+                  (item.featuredTier as "featured" | "promoted" | null | undefined) ?? null
+                }
                 isBoosted={item.isBoosted as boolean}
                 href={`/marketplace/${item._id}`}
                 status={item.status as "active" | "sold" | "expired"}

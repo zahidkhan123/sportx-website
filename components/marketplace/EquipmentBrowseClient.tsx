@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { marketplaceAPI } from "@/lib/api";
+import { marketplaceAPI, type MarketplaceProductCondition } from "@/lib/api";
 import { filterRealMarketplaceItems } from "@/lib/utils";
 import { MarketplaceListingCard } from "@/components/MarketplaceListingCard";
 import GoogleAds from "@/components/GoogleAds";
@@ -46,9 +46,12 @@ export function EquipmentBrowseClient() {
                 image={(item.images as string[])?.[0]}
                 location={item.location as string}
                 category={item.category as string}
-                condition={item.condition as "New" | "Used"}
+                condition={item.condition as MarketplaceProductCondition}
                 viewsCount={item.viewsCount as number}
                 isFeatured={item.isFeatured as boolean}
+                featuredTier={
+                  (item.featuredTier as "featured" | "promoted" | null | undefined) ?? null
+                }
                 isBoosted={item.isBoosted as boolean}
                 href={`/marketplace/${item._id}`}
                 status={item.status as "active" | "sold" | "expired"}

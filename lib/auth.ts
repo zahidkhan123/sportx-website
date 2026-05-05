@@ -113,8 +113,12 @@ export const authService = {
     throw new Error(response.message || 'Failed to send reset code');
   },
 
-  verifyOTP: async (email: string, otp: string) => {
-    const response = await authAPI.verifyOTP(email, otp);
+  verifyOTP: async (
+    email: string,
+    otp: string,
+    options?: { passwordReset?: boolean }
+  ) => {
+    const response = await authAPI.verifyOTP(email, otp, options);
     if (response.success) {
       return response.data;
     }

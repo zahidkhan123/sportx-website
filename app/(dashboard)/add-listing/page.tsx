@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { marketplaceAPI, packagesAPI } from "@/lib/api";
+import {
+  marketplaceAPI,
+  packagesAPI,
+  type MarketplaceProductCondition,
+} from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +39,7 @@ export default function AddListingPage() {
     images: [""] as string[],
     price: "",
     category: "",
-    condition: "New" as "New" | "Used",
+    condition: "New" as MarketplaceProductCondition,
     location: "",
     contactNumber: "",
     isFeatured: false,
@@ -65,7 +69,7 @@ export default function AddListingPage() {
           images: ad.images || [""],
           price: ad.price?.toString() || "",
           category: ad.category || "",
-          condition: ad.condition || "New",
+          condition: (ad.condition || "New") as MarketplaceProductCondition,
           location: ad.location || "",
           contactNumber: ad.contactNumber || "",
           isFeatured: ad.isFeatured || false,
@@ -451,7 +455,7 @@ export default function AddListingPage() {
                         </Label>
                         <Select
                           value={formData.condition}
-                          onValueChange={(value: "New" | "Used") =>
+                          onValueChange={(value: MarketplaceProductCondition) =>
                             setFormData({ ...formData, condition: value })
                           }
                         >
@@ -461,6 +465,15 @@ export default function AddListingPage() {
                           <SelectContent className="bg-black border-white/10">
                             <SelectItem value="New" className="text-white">
                               New
+                            </SelectItem>
+                            <SelectItem value="Like New" className="text-white">
+                              Like New
+                            </SelectItem>
+                            <SelectItem value="Good" className="text-white">
+                              Good
+                            </SelectItem>
+                            <SelectItem value="Fair" className="text-white">
+                              Fair
                             </SelectItem>
                             <SelectItem value="Used" className="text-white">
                               Used

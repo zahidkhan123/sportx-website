@@ -145,8 +145,16 @@ export const authAPI = {
     const response = await api.post("/api/auth/forgot-password", { email });
     return response.data;
   },
-  verifyOTP: async (email: string, otp: string) => {
-    const response = await api.post("/api/auth/verify-otp", { email, otp });
+  verifyOTP: async (
+    email: string,
+    otp: string,
+    options?: { passwordReset?: boolean }
+  ) => {
+    const response = await api.post("/api/auth/verify-otp", {
+      email,
+      otp,
+      ...(options?.passwordReset ? { passwordReset: true } : {}),
+    });
     return response.data;
   },
   resetPassword: async (email: string, otp: string, newPassword: string) => {
@@ -261,6 +269,13 @@ export const listingsAPI = {
   },
 };
 
+export type MarketplaceProductCondition =
+  | "New"
+  | "Like New"
+  | "Good"
+  | "Fair"
+  | "Used";
+
 // Marketplace API
 export const marketplaceAPI = {
   getAll: async (params?: {
@@ -271,7 +286,7 @@ export const marketplaceAPI = {
     location?: string;
     minPrice?: number;
     maxPrice?: number;
-    condition?: "New" | "Used";
+    condition?: MarketplaceProductCondition;
     featured?: boolean;
     sortBy?: "price" | "createdAt" | "views";
     sortOrder?: "asc" | "desc";
@@ -302,7 +317,7 @@ export const marketplaceAPI = {
     images: string[];
     price: number;
     category: string;
-    condition: "New" | "Used";
+    condition: MarketplaceProductCondition;
     location: string;
     contactNumber: string;
     isFeatured?: boolean;
@@ -319,7 +334,7 @@ export const marketplaceAPI = {
       images?: string[];
       price?: number;
       category?: string;
-      condition?: "New" | "Used";
+      condition?: MarketplaceProductCondition;
       location?: string;
       contactNumber?: string;
       status?: "active" | "sold" | "expired";

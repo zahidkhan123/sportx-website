@@ -79,7 +79,9 @@ export default function VerifyOTPForm() {
     setLoading(true);
 
     try {
-      const response = await authAPI.verifyOTP(email, otpString);
+      const response = await authAPI.verifyOTP(email, otpString, {
+        passwordReset: type === 'reset',
+      });
       if (response.success) {
         if (type === 'reset') {
           router.push(`/reset-password?email=${encodeURIComponent(email)}&otp=${otpString}`);

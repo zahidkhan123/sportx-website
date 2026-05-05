@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
+// import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "./providers";
@@ -62,6 +62,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        {/*
         <Script
           id="google-adsense-verification"
           async
@@ -69,6 +70,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
+        */}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

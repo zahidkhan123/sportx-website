@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "4C7BNRVJTN.com.sportx360",
+        "paths": [
+          "/find-match",
+          "/find-match/*"
+        ]
+      }
+    ]
+  }
+}

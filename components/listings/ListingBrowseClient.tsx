@@ -293,6 +293,10 @@ export function ListingBrowseClient({
                     listingData={listing.data as Record<string, unknown>}
                     location={listing.location as Record<string, unknown>}
                     isFeatured={listing.isFeatured as boolean}
+                    featuredTier={
+                      (listing as { featuredTier?: "featured" | "promoted" | null })
+                        .featuredTier ?? null
+                    }
                     isBoosted={listing.isBoosted as boolean}
                   />
                 ))}
@@ -350,6 +354,10 @@ export function ListingBrowseClient({
                       listingData={listing.data as Record<string, unknown>}
                       location={listing.location as Record<string, unknown>}
                       isFeatured={listing.isFeatured as boolean}
+                      featuredTier={
+                        (listing as { featuredTier?: "featured" | "promoted" | null })
+                          .featuredTier ?? null
+                      }
                       isBoosted={listing.isBoosted as boolean}
                     />
                   )

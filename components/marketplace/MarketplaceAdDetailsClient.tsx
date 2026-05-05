@@ -17,12 +17,13 @@ import {
   Flag,
   CheckCircle,
   ArrowLeft,
-  Star,
   Clock,
   Rocket,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { FeaturedBadge } from "@/components/FeaturedBadge";
+import { resolveMarketplaceFeaturedTier } from "@/constants/featuredTiers.constants";
 
 export function MarketplaceAdDetailsClient({ adId }: { adId: string }) {
   const router = useRouter();
@@ -284,12 +285,10 @@ export function MarketplaceAdDetailsClient({ adId }: { adId: string }) {
                 <span className="text-3xl font-bold text-[#00FFA3]">
                   Rs {ad.price?.toLocaleString()}
                 </span>
-                {ad.isFeatured && (
-                  <Badge className="bg-gradient-to-r from-[#00FFA3] to-[#00CFFF] text-black border-0 flex items-center gap-1 px-3 py-1">
-                    <Star className="h-3 w-3 fill-black" />
-                    Featured
-                  </Badge>
-                )}
+                {(() => {
+                  const tier = resolveMarketplaceFeaturedTier(ad);
+                  return tier ? <FeaturedBadge tier={tier} /> : null;
+                })()}
                 {ad.category && (
                   <Badge className="bg-white/10 text-white border-white/20">
                     {ad.category}

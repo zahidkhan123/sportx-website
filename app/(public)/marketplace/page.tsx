@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { marketplaceAPI } from "@/lib/api";
+import { marketplaceAPI, type MarketplaceProductCondition } from "@/lib/api";
 import { MarketplaceListingCard } from "@/components/MarketplaceListingCard";
 import { EmptyState } from "@/components/EmptyState";
 import GoogleAds from "@/components/GoogleAds";
@@ -32,7 +32,9 @@ export default function MarketplacePage() {
   const [category, setCategory] = useState("");
   const [minPrice, setMinPrice] = useState<number>();
   const [maxPrice, setMaxPrice] = useState<number>();
-  const [condition, setCondition] = useState<"New" | "Used" | "">("");
+  const [condition, setCondition] = useState<MarketplaceProductCondition | "">(
+    ""
+  );
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { selectedLocation } = useLocation();
 
@@ -235,7 +237,7 @@ export default function MarketplacePage() {
                   value={condition || undefined}
                   onValueChange={(value) =>
                     setCondition(
-                      value === "all" ? "" : (value as "New" | "Used")
+                      value === "all" ? "" : (value as MarketplaceProductCondition)
                     )
                   }
                 >
@@ -248,6 +250,15 @@ export default function MarketplacePage() {
                     </SelectItem>
                     <SelectItem value="New" className="text-white">
                       New
+                    </SelectItem>
+                    <SelectItem value="Like New" className="text-white">
+                      Like New
+                    </SelectItem>
+                    <SelectItem value="Good" className="text-white">
+                      Good
+                    </SelectItem>
+                    <SelectItem value="Fair" className="text-white">
+                      Fair
                     </SelectItem>
                     <SelectItem value="Used" className="text-white">
                       Used
@@ -335,9 +346,13 @@ export default function MarketplacePage() {
                   image={(item.images as string[])?.[0]}
                   location={item.location as string}
                   category={item.category as string}
-                  condition={item.condition as "New" | "Used"}
+                  condition={item.condition as MarketplaceProductCondition}
                   viewsCount={item.viewsCount as number}
                   isFeatured={item.isFeatured as boolean}
+                  featuredTier={
+                    (item.featuredTier as "featured" | "promoted" | null | undefined) ??
+                    null
+                  }
                   isBoosted={item.isBoosted as boolean}
                   href={`/marketplace/${item._id}`}
                   status={item.status as "active" | "sold" | "expired"}
@@ -395,9 +410,13 @@ export default function MarketplacePage() {
                           image={(item.images as string[])?.[0]}
                           location={item.location as string}
                           category={item.category as string}
-                          condition={item.condition as "New" | "Used"}
+                          condition={item.condition as MarketplaceProductCondition}
                           viewsCount={item.viewsCount as number}
                           isFeatured={item.isFeatured as boolean}
+                          featuredTier={
+                            (item.featuredTier as "featured" | "promoted" | null | undefined) ??
+                            null
+                          }
                           href={`/marketplace/${item._id}`}
                           status={item.status as "active" | "sold" | "expired"}
                         />
