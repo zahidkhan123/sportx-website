@@ -6,7 +6,9 @@
         "appID": "4C7BNRVJTN.com.sportx360",
         "paths": [
           "/find-match",
-          "/find-match/*"
+          "/find-match/*",
+          "/events",
+          "/events/*"
         ]
       }
     ]

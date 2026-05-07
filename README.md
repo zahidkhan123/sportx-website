@@ -100,6 +100,7 @@ This project serves the **mobile app** link infrastructure on the **same domain*
 | `/.well-known/apple-app-site-association` | iOS Universal Links (JSON) |
 | `/.well-known/assetlinks.json` | Android App Links (JSON) |
 | `/find-match` | Fallback landing page (open app / App Store / Play Store) |
+| `/events/[id]/join` | Event invite landing (open app / App Store / Play Store) |
 
 **Included in the repo**
 
@@ -107,13 +108,15 @@ This project serves the **mobile app** link infrastructure on the **same domain*
 - `public/.well-known/assetlinks.json` — keep **Play App Signing** + **upload** SHA-256 fingerprints current (see Play Console → App integrity).
 - `vercel.json` — sets `Content-Type: application/json` for both `.well-known` files (required for verification).
 - `app/find-match/` — Next.js route for the landing UI (preserves `?pool=…` etc. for the `sportx360://` handoff).
+- `app/(public)/events/[id]/join/` — Next.js route for shared event invites (web-to-app handoff).
 
 **After you deploy to Vercel**
 
 1. Confirm production URLs (replace domain if yours differs):  
    `https://sportx360.com/.well-known/apple-app-site-association`  
    `https://sportx360.com/.well-known/assetlinks.json`  
-   `https://sportx360.com/find-match`
+   `https://sportx360.com/find-match`  
+   `https://sportx360.com/events/<event-id>/join?inviteCode=<code>&inviterId=<id>`
 2. In the Vercel project, set the **root directory** to `website` if the repo is monorepo-style, so `vercel.json` and `public/` apply to this app.
 3. Apple: Associated Domains on the iOS app must use the **same** host (`applinks:sportx360.com`).
 4. Android: reinstall or run `adb shell pm verify-app-links --re-verify com.sportx360` after `assetlinks.json` updates.
