@@ -44,12 +44,14 @@ export const metadata: Metadata = {
     title: "SportX360 — Sports Marketplace",
     description:
       "Find cricket players in Pakistan, join a team near you, and explore cricket teams and sports listings across Pakistan and worldwide.",
+    images: [{ url: `${siteUrl}/icon.png` }],
   },
   twitter: {
     card: "summary_large_image",
     title: "SportX360 — Sports Marketplace",
     description:
       "Cricket players near you, cricket teams Pakistan, grounds, and sports marketplace listings.",
+    images: [`${siteUrl}/icon.png`],
   },
   robots: { index: true, follow: true },
 };

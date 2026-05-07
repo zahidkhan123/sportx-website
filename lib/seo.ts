@@ -13,7 +13,7 @@ export function getSiteUrl(): string {
   return "https://sportx360.com";
 }
 
-const DEFAULT_OG = "/icon.svg";
+const DEFAULT_OG = "/icon.png";
 
 export type ListingLike = {
   _id?: string;
