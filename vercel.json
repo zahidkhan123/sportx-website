@@ -1,4 +1,10 @@
 {
+  "rewrites": [
+    {
+      "source": "/events/:id/join",
+      "destination": "/find-match?eventId=:id"
+    }
+  ],
   "headers": [
     {
       "source": "/.well-known/apple-app-site-association",
